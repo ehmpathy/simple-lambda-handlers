@@ -389,4 +389,76 @@ describe('createApiGatewayHandler', () => {
       expect(result.body).toEqual('{"errorMessage":"you asked for it, bud","errorType":"BadRequestError"}');
     });
   });
+  describe('deserialization', () => {
+    const handlerWithDeserialization = createApiGatewayHandler({
+      logic: async (event: { body: any }) => {
+        return { statusCode: 200, body: typeof event.body };
+      },
+      schema: Joi.any(),
+      log: {
+        // note: we JSON.parse(JSON.stringify((...)) so that the log metadata is accessed by value, not reference (otherwise, expect to have been called with object changes over time, even after the log message results, if mocking or spying on it)
+        debug: (message, metadata) => console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
+        error: (message, metadata) => console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
+      },
+    });
+    const handlerWithoutDeserialization = createApiGatewayHandler({
+      logic: async (event: { body: any }) => {
+        return { statusCode: 200, body: typeof event.body };
+      },
+      schema: Joi.any(),
+      log: {
+        // note: we JSON.parse(JSON.stringify((...)) so that the log metadata is accessed by value, not reference (otherwise, expect to have been called with object changes over time, even after the log message results, if mocking or spying on it)
+        debug: (message, metadata) => console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
+        error: (message, metadata) => console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
+      },
+      deserialize: {
+        body: false,
+      },
+    });
+    test('handler deserializes json content body by default', async () => {
+      const result = await invokeHandlerForTesting({
+        event: {
+          httpMethod: 'POST',
+          headers: {
+            'content-type': 'application/json; charset=utf-8', // note: required for deserialization to occur
+          },
+          body: JSON.stringify({ important: true }),
+        },
+        handler: handlerWithDeserialization,
+      });
+      expect(result).toMatchObject({ statusCode: 200, body: '"object"' });
+    });
+    test('handler logs raw input before deserializing json', async () => {
+      const consoleLogMock = jest.spyOn(console, 'log');
+      const result = await invokeHandlerForTesting({
+        event: {
+          httpMethod: 'POST',
+          headers: {
+            'content-type': 'application/json; charset=utf-8', // note: required for deserialization to occur
+          },
+          body: JSON.stringify({ important: true }),
+        },
+        handler: handlerWithDeserialization,
+      });
+      expect(result).toMatchObject({ statusCode: 200, body: '"object"' });
+      expect(consoleLogMock).toHaveBeenNthCalledWith(
+        1,
+        'handler.input',
+        expect.objectContaining({ event: expect.objectContaining({ body: JSON.stringify({ important: true }) }) }),
+      ); // the stringified content
+    });
+    test('handler does not deserialize json content body if asked not to', async () => {
+      const result = await invokeHandlerForTesting({
+        event: {
+          httpMethod: 'POST',
+          headers: {
+            'content-type': 'application/json; charset=utf-8', // note: required for deserialization to occur
+          },
+          body: JSON.stringify({ important: true }),
+        },
+        handler: handlerWithoutDeserialization,
+      });
+      expect(result).toMatchObject({ statusCode: 200, body: '"string"' });
+    });
+  });
 });

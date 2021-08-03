@@ -84,16 +84,31 @@ const serializers = [
   },
 ];
 
+/**
+ * `createApiGatewayHandler` simplifies interacting with AWS' Api Gateway to make it easy to address considerations such as statusCodes, cors, body serialization, and best security practices.
+ *
+ * A thorough example, with cors and auth tokens, can be found [in the readme](https://github.com/uladkasach/simple-lambda-handlers#api-gateway-handler).
+ */
 export const createApiGatewayHandler = ({
   log,
   schema,
   logic,
   cors,
+  deserialize = { body: true },
 }: {
   logic: ApiGatewayHandlerLogic;
   schema: EventSchema; // for event validation
   log: LogMethods; // for standard logging
   cors?: CORSOptions; // for returning coors if desired; allows a subset of `httpCors` options
+  deserialize?: {
+    /**
+     * defines whether or not the body should be deserialized
+     * - e.g., JSON.parse() if the body is a JSON string (i.e., `headers['content-type'].includes('application/json')`)
+     *
+     * defaults to true; set this to false if you'd like the raw string input
+     */
+    body: boolean;
+  };
 }) => {
   const middlewares = [
     badRequestErrorMiddleware({ apiGateway: true }), // handle BadRequestErrors appropriately (i.e., dont log it as an error, but report to the user what failed)
@@ -101,7 +116,7 @@ export const createApiGatewayHandler = ({
     ioLoggingMiddleware({ logDebug: log.debug }), // log the input and output to the lambda, for debugging
     ...(cors ? [httpCors(corsInputToCorsConfig(cors))] : []), // adds cors headers to response, if cors was requested
     httpSecurityHeaders(), // adds best practice headers to the request; (!) note, also handles any uncaught errors to return them as statusCode: 500 responses
-    httpRequestJsonBodyParser(), // converts JSON body to object, when present; throws UnprocessableEntity (422 errors) for malformed json
+    ...(deserialize.body ? [httpRequestJsonBodyParser()] : []), // converts JSON body to object, when present; throws UnprocessableEntity (422 errors) for malformed json
     joiEventValidationMiddleware({ schema }), // validate the input against a schema
     httpResponseSerializer({ serializers, default: 'application/json' }),
   ];
