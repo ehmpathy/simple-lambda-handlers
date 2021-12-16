@@ -30,7 +30,7 @@ import middy from '@middy/core';
 export class BadRequestError extends Error {
   statusCode = 400;
   constructor(message: string, metadata?: Record<string, any>) {
-    super(`BadRequestError: ${message}${metadata ? `\n\n${JSON.stringify(metadata)}` : ''}}`);
+    super(`${message}${metadata ? `\n\n${JSON.stringify(metadata)}` : ''}`);
   }
 }
 
