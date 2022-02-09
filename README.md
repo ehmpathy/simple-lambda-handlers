@@ -57,11 +57,12 @@ Here is an example that supports CORS with credentials as well as an auth token 
 
 ```ts
 // e.g., in `src/handlers/sendUserNotification.ts
-import { createStandardHandler, BadRequestError } from 'simple-lambda-handlers';
+import { ApiGatewayHandlerLogic, createApiGatewayHandler, BadRequestError } from 'simple-lambda-handlers';
 import Joi from 'joi';
 
 const schema = Joi.object()
   .keys({
+    httpMethod: Joi.string().valid('POST').required(), // if you only allow certain http methods, you can enforce that here
     headers: Joi.object()
       .keys({
         authorization: Joi.string().required(), // if your api requires an auth token, you can enforce that its sent here
@@ -77,12 +78,12 @@ const schema = Joi.object()
   })
   .unknown(true); // api gateway object will have more keys - we just care about the ones above in this example
 
-const handle = async ({
+const handle: ApiGatewayHandlerLogic = async ({
   headers,
-  event,
+  body,
 }: {
   headers: { authorization: string };
-  event: { body: { userId: string; message: string } };
+  body: { userId: string; message: string };
 }): Promise<{ statusCode: 200; body: { awesomeResponse } }> => {
   // any additional validation you may want
   if (message.includes(PROFANITY)) throw new BadRequestError('message should not include profanity'); // will result in a `{ statusCode: 400, body: { errorMessage: 'message should not include profanity' } }` response and wont showup in cloudwatch as an error, since `instanceof BadRequestError`
@@ -97,11 +98,14 @@ const handle = async ({
   return { statusCode: 200, body: { awesomeResponse } };
 };
 
-export const handler = createStandardHandler({
+export const handler = createApiGatewayHandler({
   log,
   schema,
   logic: handle,
-  cors: { origin: 'www.yoursite.com', withCredentials: true },
+  cors: {
+    origins: ['yoursite.com', 'yoursite.dev'], // e.g., allow requests only from these two domains
+    withCredentials: true, // e.g., with credentials, so that the browser will send cookies
+  },
 });
 ```
 
