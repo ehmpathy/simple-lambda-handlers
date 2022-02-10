@@ -15,6 +15,7 @@
  *    - i.e., for some reason, we were not able to handle a request - and we should look into it
  */
 import middy from '@middy/core';
+import { HTTPStatusCode } from '../../domain/constants';
 
 /**
  * BadRequestError.
@@ -28,7 +29,7 @@ import middy from '@middy/core';
  * Tip: Use a lambda client like [simple-lambda-client](https://github.com/uladkasach/simple-lambda-client) to hydrate the error client side if invoking a lambda directly. Otherwise, if invoking an api-gateway backed lambda through rest, your typical rest client will hydrate the error when it sees statusCode != 200.
  */
 export class BadRequestError extends Error {
-  statusCode = 400;
+  statusCode = HTTPStatusCode.CLIENT_ERROR_400;
   constructor(message: string, metadata?: Record<string, any>) {
     super(`${message}${metadata ? `\n\n${JSON.stringify(metadata)}` : ''}`);
   }
@@ -41,7 +42,7 @@ export const badRequestErrorMiddleware = (opts?: { apiGateway?: boolean }) => {
       // determine how to format the response, based on whether the response is for api gateway or standard invocation
       const response = opts?.apiGateway
         ? {
-            statusCode: 400,
+            statusCode: HTTPStatusCode.CLIENT_ERROR_400,
             body: {
               errorMessage: handler.error.message,
               errorType: 'BadRequestError',

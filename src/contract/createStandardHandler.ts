@@ -3,7 +3,7 @@ import middy from '@middy/core';
 import { badRequestErrorMiddleware } from '../logic/middlewares/badRequestErrorMiddleware';
 import { ioLoggingMiddleware } from '../logic/middlewares/ioLoggingMiddleware';
 import { joiEventValidationMiddleware } from '../logic/middlewares/joiEventValidationMiddleware';
-import { EventSchema, HandlerLogic, LogMethods } from '../model/general';
+import { EventSchema, HandlerLogic, LogMethods } from '../domain/general';
 import { internalServiceErrorMiddleware } from '../logic/middlewares/internalServiceErrorMiddleware';
 
 export const createStandardHandler = ({

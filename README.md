@@ -57,7 +57,7 @@ Here is an example that supports CORS with credentials as well as an auth token 
 
 ```ts
 // e.g., in `src/handlers/sendUserNotification.ts
-import { ApiGatewayHandlerLogic, createApiGatewayHandler, BadRequestError } from 'simple-lambda-handlers';
+import { createApiGatewayHandler, BadRequestError, ApiGatewayHandlerLogic, HTTPStatusCode } from 'simple-lambda-handlers';
 import Joi from 'joi';
 
 const schema = Joi.object()
@@ -84,7 +84,7 @@ const handle: ApiGatewayHandlerLogic = async ({
 }: {
   headers: { authorization: string };
   body: { userId: string; message: string };
-}): Promise<{ statusCode: 200; body: { awesomeResponse } }> => {
+}): Promise<{ statusCode: HTTPStatusCode; body: { awesomeResponse } }> => {
   // any additional validation you may want
   if (message.includes(PROFANITY)) throw new BadRequestError('message should not include profanity'); // will result in a `{ statusCode: 400, body: { errorMessage: 'message should not include profanity' } }` response and wont showup in cloudwatch as an error, since `instanceof BadRequestError`
 
@@ -95,7 +95,7 @@ const handle: ApiGatewayHandlerLogic = async ({
   if (codeHadError) throw new Error('just to show what would happen if there is an internal service error'); // will result in a `{ statusCode: 500 }` response, without any details of the error, to ensure no secrets are leaked in unexpected error stacks
 
   // return something
-  return { statusCode: 200, body: { awesomeResponse } };
+  return { statusCode: HTTPStatusCode.SUCCESS_200, body: { awesomeResponse } };
 };
 
 export const handler = createApiGatewayHandler({

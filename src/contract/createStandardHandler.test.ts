@@ -9,7 +9,7 @@ import { createStandardHandler } from './createStandardHandler';
 
 describe('createStandardHandler', () => {
   beforeEach(() => jest.clearAllMocks());
-  let exampleHandler: middy.Middy<any, unknown, Context>;
+  let exampleHandler: middy.Middy<any, any, Context>;
   it('should be possible to instantiate a handler', () => {
     exampleHandler = createStandardHandler({
       logic: async (event: { throwInternalError: boolean; throwBadRequestError: boolean }) => {

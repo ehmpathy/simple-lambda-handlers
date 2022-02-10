@@ -1,5 +1,5 @@
 import middy from '@middy/core';
-import { LogMethods } from '../../model/general';
+import { LogMethods } from '../../domain/general';
 
 /**
  * ioLoggingMiddleware simply logs a debug message for the input and output of a lambda

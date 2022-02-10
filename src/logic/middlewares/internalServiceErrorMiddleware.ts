@@ -1,6 +1,7 @@
 import middy from '@middy/core';
+import { HTTPStatusCode } from '../../domain/constants';
 
-import { LogMethods } from '../../model/general';
+import { LogMethods } from '../../domain/general';
 import { BadRequestError } from './badRequestErrorMiddleware';
 
 /**
@@ -8,7 +9,6 @@ import { BadRequestError } from './badRequestErrorMiddleware';
  *
  * because of this, there is no need to explicitly distinguish an `InternalServiceError` class. By not being a `BadRequestError`, it is an InternalServiceError
  */
-
 export const internalServiceErrorMiddleware = ({ logError, apiGateway }: { logError: LogMethods['error']; apiGateway?: boolean }) => {
   const onError: middy.MiddlewareFunction<any, any> = async (handler) => {
     // 1. check if the error was due to a bad request from the user. if it was, then do nothing - as this was not an internal service error
@@ -24,7 +24,7 @@ export const internalServiceErrorMiddleware = ({ logError, apiGateway }: { logEr
     if (apiGateway) {
       // build the response object
       const response = {
-        statusCode: 500,
+        statusCode: HTTPStatusCode.SERVER_ERROR_500,
         // note: we dont include any error message or details, as we dont want to leak secrets or internal info for internal service errors
       };
 

@@ -179,7 +179,7 @@ describe('createApiGatewayHandler', () => {
     it('should include cors headers in the io log output', async () => {
       const debugMock = jest.fn();
       const errorMock = jest.fn();
-      const handler = createApiGatewayHandler({
+      const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async () => {
           return { statusCode: 200, body: 'success' };
         },
@@ -236,7 +236,7 @@ describe('createApiGatewayHandler', () => {
   });
   describe('headers', () => {
     test('a handler should be able to access the Authorization header of an event payload - which is a common use case for flows using jwt', async () => {
-      const handler = createApiGatewayHandler({
+      const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async (event: { headers: { Authorization: string }; body: string }) => ({
           statusCode: 200,
           body: `${event.headers.Authorization}:${event.body}`,
@@ -269,7 +269,7 @@ describe('createApiGatewayHandler', () => {
       expect(result.body).toEqual('"Bearer __TOKEN_GOES_HERE__:hello!"');
     });
     test('a handler should be able to set custom headers in the response', async () => {
-      const handler = createApiGatewayHandler({
+      const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async () => ({
           statusCode: 200,
           headers: {
@@ -299,7 +299,7 @@ describe('createApiGatewayHandler', () => {
   describe('context', () => {
     test('a handler should be able to use context.authorizer.claims - which is a common use case for flows using jwt authorizers', async () => {
       // per https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-jwt-authorizer.html
-      const handler = createApiGatewayHandler({
+      const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async (event: { body: string }, context) => ({
           statusCode: 200,
           body: `${context.authorizer!.claims.sub}:${event.body}`,
@@ -334,7 +334,7 @@ describe('createApiGatewayHandler', () => {
   describe('serialization', () => {
     test('handler serializes the response body', async () => {
       // otherwise, api gateway will throw an error saying "Lambda body contains the wrong type for field "body""
-      const handler = createApiGatewayHandler({
+      const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async (event: { body: { throwBadRequestError?: boolean } }) => {
           if (event.body.throwBadRequestError) throw new BadRequestError('you asked for it, bud');
           return {
@@ -362,7 +362,7 @@ describe('createApiGatewayHandler', () => {
     });
     test('a handler serializes the response body even for bad request errors', async () => {
       // otherwise, api gateway will throw an error saying "Lambda body contains the wrong type for field "body""
-      const handler = createApiGatewayHandler({
+      const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async (event: { body: { throwBadRequestError?: boolean } }) => {
           if (event.body.throwBadRequestError) throw new BadRequestError('you asked for it, bud');
           return {

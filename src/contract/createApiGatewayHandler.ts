@@ -10,11 +10,12 @@ import { badRequestErrorMiddleware } from '../logic/middlewares/badRequestErrorM
 import { internalServiceErrorMiddleware } from '../logic/middlewares/internalServiceErrorMiddleware';
 import { ioLoggingMiddleware } from '../logic/middlewares/ioLoggingMiddleware';
 import { joiEventValidationMiddleware } from '../logic/middlewares/joiEventValidationMiddleware';
-import { EventSchema, HandlerLogic, LogMethods } from '../model/general';
+import { EventSchema, HandlerLogic, LogMethods } from '../domain/general';
+import { HTTPStatusCode } from '../domain/constants';
 
 export type ApiGatewayHandlerLogic = HandlerLogic<
   { httpMethod: any; headers: any; body: any },
-  { statusCode: 200; headers?: any; body: any },
+  { statusCode: HTTPStatusCode; headers?: any; body?: any },
   APIGatewayEventRequestContext
 >;
 
