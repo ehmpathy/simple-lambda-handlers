@@ -1,7 +1,7 @@
 /**
  * Errors that ta service can produce, generically, come in two flavors:
  * - BadRequestErrors:
- *  - i.e., either in user validation or in business logic, we decide that this is a bad request.
+ *  - i.e., either in input validation or in business logic, we decide that this is a bad request.
  * - InternalServiceErrors
  *  - i.e., everything else
  *
@@ -18,13 +18,21 @@ import middy from '@middy/core';
 import { HTTPStatusCode } from '../../domain/constants';
 
 /**
- * BadRequestError.
+ * BadRequestError
+ * - thrown when a lambda successfully decides a request was invalid
+ * - enables conveniently specifying that
+ *    - the lambda invocation executed successfully
+ *    - the request was invalid
  *
- * For situations where the request is invalid and should be reported to the client as such. Used in situations where the business logic proactively rejects this request.
+ * Effect:
+ * - exit the code path conveniently when this state is identified
+ * - report to the caller that their request has failed
+ * - report to aws-lambda infrastructure that this invocation has succeeded
+ *    - meaning this invocation will not be marked as an error in aws-cloudwatch
+ *    - meaning this invocation will not be retried by any retry mechanisms (e.g., sqs, kinesis, etc)
  *
- * The purpose of distinguishing this type of error is that it will not show up in CloudWatch, when used with [simple-lambda-handlers](https://github.com/uladkasach/simple-lambda-handlers).
- *
- * Why? because a BadRequestError means that the problem is with the client's request, not the internal workings of this service. I.e., this service is functioning as intended and any debugging needs to be done in the client who called this.
+ * Why? because a BadRequestError means that the problem is with the client's request, not the internal workings of this service.
+ * - i.e., this service is functioning as intended and any debugging needs to be done in the client who called this.
  *
  * Tip: Use a lambda client like [simple-lambda-client](https://github.com/uladkasach/simple-lambda-client) to hydrate the error client side if invoking a lambda directly. Otherwise, if invoking an api-gateway backed lambda through rest, your typical rest client will hydrate the error when it sees statusCode != 200.
  */
@@ -35,6 +43,12 @@ export class BadRequestError extends Error {
   }
 }
 
+/**
+ * badRequestErrorMiddleware
+ * - handles ensuring that bad-request-errors are handled and the lambda successfully returns an error response
+ *   - "successfully return" meaning the lambda will not be marked as having a failure, it will successfully execute
+ *   - "return an error" meaning the client will get an error object in their response payload, instead of a success response
+ */
 export const badRequestErrorMiddleware = (opts?: { apiGateway?: boolean }) => {
   const onError: middy.MiddlewareFunction<any, any> = async (handler) => {
     // 1. check if the error was due to a bad request from the user. if it was, just return the error object, so its not reported as our lambda breaking in aws cloudwatch
