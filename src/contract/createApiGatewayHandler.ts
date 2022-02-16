@@ -1,22 +1,31 @@
-import { APIGatewayEventRequestContext } from 'aws-lambda';
+import { APIGatewayEventRequestContext, APIGatewayEventRequestContextV2 } from 'aws-lambda';
 
 import middy from '@middy/core';
 import httpCors from '@middy/http-cors';
 import httpRequestJsonBodyParser from '@middy/http-json-body-parser';
-import httpSecurityHeaders from '@middy/http-security-headers';
 import httpResponseSerializer from '@middy/http-response-serializer';
+import httpSecurityHeaders from '@middy/http-security-headers';
 
+import { HTTPStatusCode } from '../domain/constants';
+import { EventSchema, HandlerLogic, LogMethods } from '../domain/general';
+import { apiGatewayEventShapeNormalizationMiddleware } from '../logic/middlewares/apiGatewayEventShapeNormalizationMiddleware';
 import { badRequestErrorMiddleware } from '../logic/middlewares/badRequestErrorMiddleware';
 import { internalServiceErrorMiddleware } from '../logic/middlewares/internalServiceErrorMiddleware';
 import { ioLoggingMiddleware } from '../logic/middlewares/ioLoggingMiddleware';
 import { joiEventValidationMiddleware } from '../logic/middlewares/joiEventValidationMiddleware';
-import { EventSchema, HandlerLogic, LogMethods } from '../domain/general';
-import { HTTPStatusCode } from '../domain/constants';
 
 export type ApiGatewayHandlerLogic = HandlerLogic<
-  { httpMethod: any; headers: any; body: any },
+  {
+    httpMethod: any;
+    headers: any;
+    body: any;
+    path: string;
+    isBase64Encoded: boolean;
+    pathParameters: { [name: string]: string } | null;
+    queryStringParameters: { [name: string]: string } | null;
+  },
   { statusCode: HTTPStatusCode; headers?: any; body?: any },
-  APIGatewayEventRequestContext
+  APIGatewayEventRequestContext | APIGatewayEventRequestContextV2
 >;
 
 export interface CORSOptions {
@@ -118,6 +127,7 @@ export const createApiGatewayHandler = ({
     ...(cors ? [httpCors(corsInputToCorsConfig(cors))] : []), // adds cors headers to response, if cors was requested
     httpSecurityHeaders(), // adds best practice headers to the request; (!) note, also handles any uncaught errors to return them as statusCode: 500 responses
     ...(deserialize.body ? [httpRequestJsonBodyParser()] : []), // converts JSON body to object, when present; throws UnprocessableEntity (422 errors) for malformed json
+    apiGatewayEventShapeNormalizationMiddleware(), // normalizes some attributes in the request event to make input consistent between ApiGatewayV1 requests and ApiGatewayV2 requests
     joiEventValidationMiddleware({ schema }), // validate the input against a schema
     httpResponseSerializer({ serializers, default: 'application/json' }),
   ];
