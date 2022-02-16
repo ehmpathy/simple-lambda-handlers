@@ -302,7 +302,7 @@ describe('createApiGatewayHandler', () => {
       const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async (event: { body: string }, context) => ({
           statusCode: 200,
-          body: `${context.authorizer!.claims.sub}:${event.body}`,
+          body: `${(context as any).authorizer!.claims.sub}:${event.body}`, // TODO: handle use specifying which authorizer they are using, now that aws allows multiple authorizers
         }),
         schema: Joi.object().keys({
           httpMethod: Joi.string().required(),
@@ -459,6 +459,33 @@ describe('createApiGatewayHandler', () => {
         handler: handlerWithoutDeserialization,
       });
       expect(result).toMatchObject({ statusCode: 200, body: '"string"' });
+    });
+  });
+  describe('event shape normalization', () => {
+    it('should expose a path property on the event even if its a V2 api gateway event', async () => {
+      const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
+        logic: async ({ path }) => {
+          return { statusCode: 200, body: `path: ${path}` };
+        },
+        schema: Joi.object(),
+        log: {
+          // note: we JSON.parse(JSON.stringify((...)) so that the log metadata is accessed by value, not reference (otherwise, expect to have been called with object changes over time, even after the log message results, if mocking or spying on it)
+          debug: (message, metadata) => console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
+          error: (message, metadata) => console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
+        },
+      });
+      const result = await invokeHandlerForTesting({
+        event: {
+          httpMethod: 'POST',
+          headers: {
+            'content-type': 'application/json; charset=utf-8', // note: required for deserialization to occur
+          },
+          body: JSON.stringify({ important: true }),
+          path: '/the/path',
+        },
+        handler,
+      });
+      expect(result).toMatchObject({ statusCode: 200, body: '"path: /the/path"' });
     });
   });
 });
