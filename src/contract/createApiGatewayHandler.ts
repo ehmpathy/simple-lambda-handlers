@@ -1,4 +1,5 @@
-import { APIGatewayEventRequestContext, APIGatewayEventRequestContextV2 } from 'aws-lambda';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { APIGatewayEventRequestContext, APIGatewayEventRequestContextV2 } from 'aws-lambda'; // only importing types -> dev dep
 
 import middy from '@middy/core';
 import httpCors from '@middy/http-cors';
