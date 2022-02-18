@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.8.3](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.8.2...v0.8.3) (2022-02-18)
+
+
+### Bug Fixes
+
+* **api-gateway:** ensure that lambda event validation error does not leak sensitive metadata ([#22](https://www.github.com/uladkasach/simple-lambda-handlers/issues/22)) ([95fa89a](https://www.github.com/uladkasach/simple-lambda-handlers/commit/95fa89aaf1c9ac2f7c564286728fea4399075ae5))
+
 ### [0.8.2](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.8.1...v0.8.2) (2022-02-18)
 
 
