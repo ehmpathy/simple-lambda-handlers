@@ -1,5 +1,6 @@
-import Joi from 'joi';
-
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ValidationError } from 'joi'; // only importing types -> dev dep
+import { EventSchema } from '../../domain/general';
 import { BadRequestError } from '../middlewares/badRequestErrorMiddleware';
 
 interface EventValidationErrorDetail {
@@ -11,7 +12,7 @@ export class EventValidationError extends BadRequestError {
   public details: EventValidationErrorDetail[];
   public event: any;
 
-  constructor({ error, event }: { error: Joi.ValidationError; event: any }) {
+  constructor({ error, event }: { error: ValidationError; event: any }) {
     const details = error.details.map((detail) => ({
       message: detail.message,
       path: detail.path.join('.'),
@@ -32,7 +33,7 @@ ${JSON.stringify(event, null, 2)}
   }
 }
 
-export const validateAgainstSchema = async ({ event, schema }: { event: any; schema: Joi.ObjectSchema | Joi.AnySchema }) => {
+export const validateAgainstSchema = async ({ event, schema }: { event: any; schema: EventSchema }) => {
   // validate the event
   const result = schema.validate(event);
 
