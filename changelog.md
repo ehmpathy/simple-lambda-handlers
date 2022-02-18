@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.8.1](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.8.0...v0.8.1) (2022-02-18)
+
+
+### Bug Fixes
+
+* **types:** ensure that v17+ joi event schema types supported ([#19](https://www.github.com/uladkasach/simple-lambda-handlers/issues/19)) ([0033a91](https://www.github.com/uladkasach/simple-lambda-handlers/commit/0033a91caf0cf679db954e726cda70155d11fe4b))
+
 ## [0.8.0](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.7.0...v0.8.0) (2022-02-16)
 
 
