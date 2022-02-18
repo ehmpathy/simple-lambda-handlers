@@ -233,6 +233,25 @@ describe('createApiGatewayHandler', () => {
       });
       expect(result.statusCode).toEqual(400); // should return as a BadRequestError
     });
+    it('should not leak sensitive data from the event payload in the error message if throwing an event validation error', async () => {
+      const result = await invokeHandlerForTesting({
+        event: {
+          httpMethod: 'POST', // cors only get set if there is a `httpMethod` in the request
+          body: { something: 'unexpected' },
+          requestContext: {
+            awsAccountId: '__SENSITIVE__', // actually on the request context
+            mothersMaidenName: '__SENSITIVE__', // not actually on the request context
+          },
+          otherSensitiveStuffAwsMayDecideToAddInTheFuture: '__SENSITIVE__',
+        },
+        handler: exampleHandler,
+      });
+      expect(result.statusCode).toEqual(400); // should return as a BadRequestError
+      expect(result.body).toContain('Errors on 1 properties were found while validating properties for lambda invocation event');
+      expect(result.body).not.toContain('__SENSITIVE__');
+      expect(result.body).not.toContain('requestContext');
+      expect(result.body).not.toContain('awsAccountId');
+    });
   });
   describe('headers', () => {
     test('a handler should be able to access the Authorization header of an event payload - which is a common use case for flows using jwt', async () => {

@@ -129,7 +129,7 @@ export const createApiGatewayHandler = ({
     httpSecurityHeaders(), // adds best practice headers to the request; (!) note, also handles any uncaught errors to return them as statusCode: 500 responses
     ...(deserialize.body ? [httpRequestJsonBodyParser()] : []), // converts JSON body to object, when present; throws UnprocessableEntity (422 errors) for malformed json
     apiGatewayEventShapeNormalizationMiddleware(), // normalizes some attributes in the request event to make input consistent between ApiGatewayV1 requests and ApiGatewayV2 requests
-    joiEventValidationMiddleware({ schema }), // validate the input against a schema
+    joiEventValidationMiddleware({ schema, apiGateway: true }), // validate the input against a schema
     httpResponseSerializer({ serializers, default: 'application/json' }),
   ];
   return middy(
