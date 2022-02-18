@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.8.2](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.8.1...v0.8.2) (2022-02-18)
+
+
+### Bug Fixes
+
+* **size:** remove aws-lambda and aws-sdk from dependencies ([fc27f10](https://www.github.com/uladkasach/simple-lambda-handlers/commit/fc27f10909984593c7abba49ce87f20c118d17ff))
+
 ### [0.8.1](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.8.0...v0.8.1) (2022-02-18)
 
 
