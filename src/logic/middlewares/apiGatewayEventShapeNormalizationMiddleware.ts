@@ -18,6 +18,7 @@ export const apiGatewayEventShapeNormalizationMiddleware = () => {
 
     // ensure that the event given to the handler always has a `path` param
     if (isV2APIGatewayEvent(event)) request.event.path = event.rawPath; // for whatever reason, apiGatewayV2 response renamed `path` -> `rawPath`, so add `path` for backwards compatibility
+    if (isV2APIGatewayEvent(event)) request.event.httpMethod = event.requestContext.http.method; // for whatever reason, apiGatewayV2 response renamed `httpMethod` -> `requestContext.http.method`, so add `httpMethod` for backwards compatibility
   };
   return {
     before,

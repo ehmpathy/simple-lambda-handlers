@@ -127,6 +127,37 @@ describe('createApiGatewayHandler', () => {
         },
       });
     });
+    it('should return correct cors headers when cors is requested - successful response - preflight request', async () => {
+      const result = await invokeHandlerForTesting({
+        event: {
+          httpMethod: 'OPTIONS', // cors only get set if there is a `httpMethod` in the request; preflight uses OPTIONS method
+          body: { throwInternalError: false, throwBadRequestError: false },
+        },
+        handler: exampleHandler,
+      });
+      expect(result).toMatchObject({
+        headers: {
+          'Access-Control-Allow-Origin': '*', // Tells browser that all these origins are accepted; TODO: update to support an 'allowlist' of origins, to make it more secure (E.g., `ahbode.com`, `localhost:3000`, `192.168...`)
+          'Access-Control-Allow-Credentials': 'true', // Required for cookies, authorization headers with HTTPS
+        },
+      });
+    });
+    it('should return correct cors headers when cors is requested - successful response - even for apiGatewayV2 requests', async () => {
+      const result = await invokeHandlerForTesting({
+        event: {
+          version: '2.0', // identify this as a payload v2 request
+          requestContext: { http: { method: 'POST' } }, // cors only get set if there is a `httpMethod` in the request; v2 payload sets it on the request context
+          body: { throwInternalError: false, throwBadRequestError: false },
+        },
+        handler: exampleHandler,
+      });
+      expect(result).toMatchObject({
+        headers: {
+          'Access-Control-Allow-Origin': '*', // Tells browser that all these origins are accepted; TODO: update to support an 'allowlist' of origins, to make it more secure (E.g., `ahbode.com`, `localhost:3000`, `192.168...`)
+          'Access-Control-Allow-Credentials': 'true', // Required for cookies, authorization headers with HTTPS
+        },
+      });
+    });
     it('should return correct cors headers when cors is requested - error response', async () => {
       const result = await invokeHandlerForTesting({
         event: {
