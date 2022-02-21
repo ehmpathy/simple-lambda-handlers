@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.8.4](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.8.3...v0.8.4) (2022-02-21)
+
+
+### Bug Fixes
+
+* **api-gateway:** normalize httpMethod arg onto event shape between v1 and v2 api gateway ([172b0eb](https://www.github.com/uladkasach/simple-lambda-handlers/commit/172b0eb8a934aa3b941c6c9d9ecc597b0d24563d))
+
 ### [0.8.3](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.8.2...v0.8.3) (2022-02-18)
 
 
