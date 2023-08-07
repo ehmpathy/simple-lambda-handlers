@@ -6,12 +6,12 @@ import { joiEventValidationMiddleware } from '../logic/middlewares/joiEventValid
 import { EventSchema, HandlerLogic, LogMethods } from '../domain/general';
 import { internalServiceErrorMiddleware } from '../logic/middlewares/internalServiceErrorMiddleware';
 
-export const createStandardHandler = ({
+export const createStandardHandler = <I, O>({
   logic,
   schema,
   log,
 }: {
-  logic: HandlerLogic<any, any>;
+  logic: HandlerLogic<I, O>;
   schema: EventSchema; // for event validation
   log: LogMethods; // for standard logging
 }) => {

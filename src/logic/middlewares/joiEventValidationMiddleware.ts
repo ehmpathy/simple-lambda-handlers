@@ -26,7 +26,7 @@ export const joiEventValidationMiddleware = ({ schema, apiGateway }: { schema: E
          * - carefully pick which attributes we want to expose through validation
          * - only run those attributes through validation -> only risk returning that data to the client
          */
-        const sanitizedApiGatewayEvent: Parameters<ApiGatewayHandlerLogic>[0] = {
+        const sanitizedApiGatewayEvent: Parameters<ApiGatewayHandlerLogic<any, any>>[0] = {
           httpMethod: request.event.httpMethod,
           headers: request.event.headers,
           body: request.event.body,

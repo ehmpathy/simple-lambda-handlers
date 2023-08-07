@@ -15,17 +15,17 @@ import { internalServiceErrorMiddleware } from '../logic/middlewares/internalSer
 import { ioLoggingMiddleware } from '../logic/middlewares/ioLoggingMiddleware';
 import { joiEventValidationMiddleware } from '../logic/middlewares/joiEventValidationMiddleware';
 
-export type ApiGatewayHandlerLogic = HandlerLogic<
+export type ApiGatewayHandlerLogic<I, O> = HandlerLogic<
   {
     httpMethod: any;
     headers: any;
-    body: any;
+    body: I;
     path: string;
     isBase64Encoded: boolean;
     pathParameters: { [name: string]: string } | null;
     queryStringParameters: { [name: string]: string } | null;
   },
-  { statusCode: HTTPStatusCode; headers?: any; body?: any },
+  { statusCode: HTTPStatusCode; headers?: any; body?: O },
   APIGatewayEventRequestContext | APIGatewayEventRequestContextV2
 >;
 
@@ -100,14 +100,14 @@ const serializers = [
  *
  * A thorough example, with cors and auth tokens, can be found [in the readme](https://github.com/uladkasach/simple-lambda-handlers#api-gateway-handler).
  */
-export const createApiGatewayHandler = ({
+export const createApiGatewayHandler = <I, O>({
   log,
   schema,
   logic,
   cors,
   deserialize = { body: true },
 }: {
-  logic: ApiGatewayHandlerLogic;
+  logic: ApiGatewayHandlerLogic<I, O>;
   schema: EventSchema; // for event validation
   log: LogMethods; // for standard logging
   cors?: CORSOptions; // for returning coors if desired; allows a subset of `httpCors` options
