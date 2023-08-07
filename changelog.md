@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.5](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.8.4...v0.8.5) (2023-08-07)
+
+
+### Bug Fixes
+
+* **practs:** use latest best practices and resolve audit ([5d345c5](https://github.com/ehmpathy/simple-lambda-handlers/commit/5d345c53792da2e4dfe1a864dfc4afc5f4d10316))
+* **types:** ensure input and output types are generic to passthrough ([4de8521](https://github.com/ehmpathy/simple-lambda-handlers/commit/4de8521189fe249cc8d7b1e6cf1c6ada00b8c82a))
+
 ### [0.8.4](https://www.github.com/uladkasach/simple-lambda-handlers/compare/v0.8.3...v0.8.4) (2022-02-21)
 
 
