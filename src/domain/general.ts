@@ -1,9 +1,15 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { Schema as JoiSchema } from 'joi'; // only importing types -> dev dep
+// only importing types -> dev dep
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { Context } from 'aws-lambda'; // only importing types -> dev dep
+import { Context } from 'aws-lambda';
+import { Schema as JoiSchema } from 'joi';
 
-export type HandlerLogic<I, O, C = Context> = (event: I, context: C) => Promise<O>;
+// only importing types -> dev dep
+
+export type HandlerLogic<I, O, C = Context> = (
+  event: I,
+  context: C,
+) => Promise<O>;
 
 export type EventSchema = JoiSchema;
 

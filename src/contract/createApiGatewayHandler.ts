@@ -1,11 +1,13 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { APIGatewayEventRequestContext, APIGatewayEventRequestContextV2 } from 'aws-lambda'; // only importing types -> dev dep
-
 import middy from '@middy/core';
 import httpCors from '@middy/http-cors';
 import httpRequestJsonBodyParser from '@middy/http-json-body-parser';
 import httpResponseSerializer from '@middy/http-response-serializer';
 import httpSecurityHeaders from '@middy/http-security-headers';
+import type {
+  APIGatewayEventRequestContext,
+  APIGatewayEventRequestContextV2,
+  Context,
+} from 'aws-lambda';
 
 import { HTTPStatusCode } from '../domain/constants';
 import { EventSchema, HandlerLogic, LogMethods } from '../domain/general';
@@ -120,7 +122,11 @@ export const createApiGatewayHandler = <I, O>({
      */
     body: boolean;
   };
-}) => {
+}): middy.Middy<
+  Parameters<ApiGatewayHandlerLogic<I, O>>[0],
+  ReturnType<ApiGatewayHandlerLogic<I, O>>,
+  Context
+> => {
   const middlewares = [
     badRequestErrorMiddleware({ apiGateway: true }), // handle BadRequestErrors appropriately (i.e., dont log it as an error, but report to the user what failed)
     internalServiceErrorMiddleware({ logError: log.error, apiGateway: true }), // log that we had an error loudly and cast it into a standard response
@@ -134,5 +140,5 @@ export const createApiGatewayHandler = <I, O>({
   ];
   return middy(
     logic as any, // as any, since ApiGatewayHandlerLogic uses the, correctly, `APIGatewayEventRequestContext` - while middy expects the normal `Context` only (https://github.com/middyjs/middy/issues/540)
-  ).use(middlewares);
+  ).use(middlewares) as any;
 };

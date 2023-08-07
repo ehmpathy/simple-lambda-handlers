@@ -1,19 +1,24 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "target": "es6",
-    "noImplicitAny": true,
-    "moduleResolution": "node",
+    "declaration": true,
+    "importsNotUsedAsValues": "remove",
+    "noPropertyAccessFromIndexSignature": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitOverride": false,
+    "resolveJsonModule": true,
     "sourceMap": true,
     "outDir": "dist",
-    "lib": [
-      "dom",
-      "es2020",
-    ],
+    "target": "es6"
   },
-  "atom": {
-    "rewriteTsconfig": false
-  }
+  "extends": "@tsconfig/node-lts-strictest/tsconfig.json",
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    "coverage",
+    "node_modules"
+  ]
 }

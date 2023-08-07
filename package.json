@@ -1,11 +1,10 @@
 {
   "name": "simple-lambda-handlers",
-  "version": "0.8.4",
+  "author": "ehmpathy",
   "description": "a simple and opinionated lambda handler library, built with middy",
-  "author": "UladKasach @uladkasach",
-  "license": "MIT",
-  "repository": "uladkasach/simple-lambda-handlers",
-  "homepage": "https://github.com/uladkasach/simple-lambda-handlers",
+  "version": "0.8.4",
+  "repository": "ehmpathy/simple-lambda-handlers",
+  "homepage": "https://github.com/ehmpathy/simple-lambda-handlers",
   "keywords": [
     "aws",
     "lambda",
@@ -16,7 +15,11 @@
     "standard",
     "handler"
   ],
-  "bugs": "https://github.com/uladkasach/simple-lambda-handlers/issues",
+  "bugs": "https://github.com/ehmpathy/simple-lambda-handlers/issues",
+  "peerDependencies": {
+    "joi": "17.x"
+  },
+  "license": "MIT",
   "main": "dist/index.js",
   "engines": {
     "node": ">=8.0.0"
@@ -25,51 +28,72 @@
     "/dist"
   ],
   "scripts": {
-    "build:clean": "rm -rf ./dist",
     "build:ts": "tsc -p ./tsconfig.build.json",
-    "build": "npm run build:clean && npm run build:ts",
-    "test:types": "tsc --noEmit",
-    "test:lint": "eslint -c ./.eslintrc.js src/**/*.ts",
-    "test:unit": "jest --forceExit --coverage --verbose",
-    "test:integration": "echo 'no integration tests'",
-    "test": "npm run test:types && npm run test:lint && npm run test:unit",
+    "commit:with-cli": "npx cz",
+    "fix:format:prettier": "prettier --write '**/*.ts' --config ./prettier.config.js",
+    "fix:format": "npm run fix:format:prettier",
+    "fix:lint": "eslint -c ./.eslintrc.js src/**/*.ts --fix",
+    "build:clean": "rm dist/ -rf",
+    "build:compile": "tsc -p ./tsconfig.build.json",
+    "build": "npm run build:clean && npm run build:compile",
+    "test:commits": "LAST_TAG=$(git describe --tags --abbrev=0 @^ 2> /dev/null || git rev-list --max-parents=0 HEAD) && npx commitlint --from $LAST_TAG --to HEAD --verbose",
+    "test:types": "tsc -p ./tsconfig.build.json --noEmit",
+    "test:format:prettier": "prettier --parser typescript --check 'src/**/*.ts' --config ./prettier.config.js",
+    "test:format": "npm run test:format:prettier",
+    "test:lint:deps": "npx depcheck -c ./depcheckrc.yml",
+    "test:lint:eslint": "eslint -c ./.eslintrc.js src/**/*.ts",
+    "test:lint": "npm run test:lint:eslint && npm run test:lint:deps",
+    "test:unit": "jest -c ./jest.unit.config.ts --forceExit --verbose --passWithNoTests",
+    "test:integration": "jest -c ./jest.integration.config.ts --forceExit --verbose --passWithNoTests",
+    "test:acceptance:locally": "npm run build && LOCALLY=true jest -c ./jest.acceptance.config.ts --forceExit --verbose --runInBand --passWithNoTests",
+    "test": "npm run test:commits && npm run test:types && npm run test:format && npm run test:lint && npm run test:unit && npm run test:integration && npm run test:acceptance:locally",
+    "test:acceptance": "npm run build && jest -c ./jest.acceptance.config.ts --forceExit --verbose --runInBand --passWithNoTests",
+    "prepush": "npm run test && npm run build",
     "prepublish": "npm run build",
-    "preversion": "npm run prepublish && npm run test",
-    "postversion": "git push origin master --tags --no-verify"
-  },
-  "devDependencies": {
-    "@types/aws-lambda": "^8.10.92",
-    "@types/aws-sdk": "2.7.0",
-    "@types/dotenv": "6.1.1",
-    "@types/jest": "24.0.18",
-    "@types/uuid": "3.4.5",
-    "@typescript-eslint/eslint-plugin": "2.19.0",
-    "@typescript-eslint/parser": "2.19.0",
-    "aws-lambda": "^1.0.7",
-    "dotenv": "8.1.0",
-    "eslint": "6.1.0",
-    "eslint-config-airbnb-base": "14.0.0",
-    "eslint-config-airbnb-typescript": "7.0.0",
-    "eslint-config-prettier": "6.10.0",
-    "eslint-plugin-import": "2.20.1",
-    "eslint-plugin-prettier": "3.1.2",
-    "husky": "1.3.1",
-    "jest": "24.8.0",
-    "prettier": "2.0.4",
-    "simple-lambda-testing-methods": "^0.2.1",
-    "ts-jest": "24.0.2",
-    "typescript": "3.9.10",
-    "uuid": "3.3.3",
-    "joi": "17.4.0"
-  },
-  "peerDependencies": {
-    "joi": "17.x"
+    "preversion": "npm run prepush",
+    "postversion": "git push origin HEAD --tags --no-verify",
+    "postinstall": "[ -d .git ] && npx husky install || exit 0"
   },
   "dependencies": {
     "@middy/core": "1.5.2",
     "@middy/http-cors": "1.4.0",
     "@middy/http-json-body-parser": "1.4.0",
     "@middy/http-response-serializer": "1.4.0",
-    "@middy/http-security-headers": "1.4.0"
+    "@middy/http-security-headers": "1.4.0",
+    "joi": "17.x"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "17.6.7",
+    "@commitlint/config-conventional": "13.1.0",
+    "@trivago/prettier-plugin-sort-imports": "2.0.4",
+    "@tsconfig/node-lts-strictest": "18.12.1",
+    "@types/aws-lambda": "^8.10.92",
+    "@types/jest": "29.2.4",
+    "@typescript-eslint/eslint-plugin": "5.46.1",
+    "@typescript-eslint/parser": "5.46.1",
+    "aws-lambda": "^1.0.7",
+    "core-js": "3.26.1",
+    "cz-conventional-changelog": "3.3.0",
+    "declapract": "^0.11.2",
+    "declapract-typescript-ehmpathy": "^0.25.7",
+    "depcheck": "1.4.3",
+    "eslint": "8.30.0",
+    "eslint-config-airbnb-typescript": "17.0.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-prettier": "4.2.1",
+    "husky": "8.0.3",
+    "jest": "29.3.1",
+    "joi": "17.4.0",
+    "prettier": "2.8.1",
+    "simple-lambda-testing-methods": "0.4.2",
+    "ts-jest": "29.0.3",
+    "ts-node": "10.9.1",
+    "typescript": "4.9.4"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

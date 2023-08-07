@@ -1,10 +1,16 @@
 import middy from '@middy/core';
 
-import { validateAgainstSchema } from '../validation/validateAgainstSchema';
-import { EventSchema } from '../../domain/general';
 import { ApiGatewayHandlerLogic } from '../..';
+import { EventSchema } from '../../domain/general';
+import { validateAgainstSchema } from '../validation/validateAgainstSchema';
 
-export const joiEventValidationMiddleware = ({ schema, apiGateway }: { schema: EventSchema; apiGateway?: boolean }) => {
+export const joiEventValidationMiddleware = ({
+  schema,
+  apiGateway,
+}: {
+  schema: EventSchema;
+  apiGateway?: boolean;
+}) => {
   const before: middy.MiddlewareFunction<any, any> = async (request) => {
     const eventToValidate = (() => {
       if (apiGateway) {
@@ -26,7 +32,9 @@ export const joiEventValidationMiddleware = ({ schema, apiGateway }: { schema: E
          * - carefully pick which attributes we want to expose through validation
          * - only run those attributes through validation -> only risk returning that data to the client
          */
-        const sanitizedApiGatewayEvent: Parameters<ApiGatewayHandlerLogic<any, any>>[0] = {
+        const sanitizedApiGatewayEvent: Parameters<
+          ApiGatewayHandlerLogic<any, any>
+        >[0] = {
           httpMethod: request.event.httpMethod,
           headers: request.event.headers,
           body: request.event.body,

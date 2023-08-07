@@ -1,5 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { ValidationError } from 'joi'; // only importing types -> dev dep
+import { ValidationError } from 'joi';
+
+// only importing types -> dev dep
 import { EventSchema } from '../../domain/general';
 import { BadRequestError } from '../middlewares/badRequestErrorMiddleware';
 
@@ -20,7 +22,9 @@ export class EventValidationError extends BadRequestError {
     }));
 
     const message = `
-Errors on ${Object.keys(details).length} properties were found while validating properties for lambda invocation event:
+Errors on ${
+      Object.keys(details).length
+    } properties were found while validating properties for lambda invocation event:
 ${JSON.stringify(details, null, 2)}
 
 Event:
@@ -33,10 +37,17 @@ ${JSON.stringify(event, null, 2)}
   }
 }
 
-export const validateAgainstSchema = async ({ event, schema }: { event: any; schema: EventSchema }) => {
+export const validateAgainstSchema = async ({
+  event,
+  schema,
+}: {
+  event: any;
+  schema: EventSchema;
+}) => {
   // validate the event
   const result = schema.validate(event);
 
   // if event is invalid, throw error
-  if (result.error) throw new EventValidationError({ error: result.error, event });
+  if (result.error)
+    throw new EventValidationError({ error: result.error, event });
 };

@@ -1,8 +1,7 @@
+import middy from '@middy/core';
 import { Context } from 'aws-lambda';
 import Joi from 'joi';
 import { invokeHandlerForTesting } from 'simple-lambda-testing-methods';
-
-import middy from '@middy/core';
 
 import { BadRequestError } from '../logic/middlewares/badRequestErrorMiddleware';
 import { createApiGatewayHandler } from './createApiGatewayHandler';
@@ -12,9 +11,13 @@ describe('createApiGatewayHandler', () => {
   let exampleHandler: middy.Middy<any, any, Context>;
   it('should be possible to instantiate a handler', () => {
     exampleHandler = createApiGatewayHandler({
-      logic: async (event: { body: { throwInternalError: boolean; throwBadRequestError: boolean } }) => {
-        if (event.body.throwInternalError) throw new Error('internal service error');
-        if (event.body.throwBadRequestError) throw new BadRequestError('bad request');
+      logic: async (event: {
+        body: { throwInternalError: boolean; throwBadRequestError: boolean };
+      }) => {
+        if (event.body.throwInternalError)
+          throw new Error('internal service error');
+        if (event.body.throwBadRequestError)
+          throw new BadRequestError('bad request');
         return { statusCode: 200, body: 'success' };
       },
       schema: Joi.object().keys({
@@ -30,8 +33,10 @@ describe('createApiGatewayHandler', () => {
       }),
       log: {
         // note: we JSON.parse(JSON.stringify((...)) so that the log metadata is accessed by value, not reference (otherwise, expect to have been called with object changes over time, even after the log message results, if mocking or spying on it)
-        debug: (message, metadata) => console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
-        error: (message, metadata) => console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
+        debug: (message, metadata) =>
+          console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
+        error: (message, metadata) =>
+          console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
       },
       cors: { origins: '*', withCredentials: true },
     });
@@ -39,20 +44,28 @@ describe('createApiGatewayHandler', () => {
   describe('successful invocations', () => {
     it('should return result of handler', async () => {
       const result = await invokeHandlerForTesting({
-        event: { httpMethod: 'POST', body: { throwInternalError: false, throwBadRequestError: false } },
+        event: {
+          httpMethod: 'POST',
+          body: { throwInternalError: false, throwBadRequestError: false },
+        },
         handler: exampleHandler,
       });
       expect(result).toMatchObject({ statusCode: 200, body: '"success"' });
     });
     it('should log input and output', async () => {
       const consoleLogMock = jest.spyOn(console, 'log');
-      const event = { httpMethod: 'POST', body: { throwInternalError: false, throwBadRequestError: false } };
+      const event = {
+        httpMethod: 'POST',
+        body: { throwInternalError: false, throwBadRequestError: false },
+      };
       await invokeHandlerForTesting({
         event,
         handler: exampleHandler,
       });
       expect(consoleLogMock).toHaveBeenCalledTimes(2);
-      expect(consoleLogMock).toHaveBeenNthCalledWith(1, 'handler.input', { event });
+      expect(consoleLogMock).toHaveBeenNthCalledWith(1, 'handler.input', {
+        event,
+      });
       expect(consoleLogMock).toHaveBeenNthCalledWith(
         2,
         'handler.output',
@@ -74,7 +87,10 @@ describe('createApiGatewayHandler', () => {
        *  In this case though, API Gateway does that for us because we still need to share _a_ response with the user
        */
       const result = await invokeHandlerForTesting({
-        event: { httpMethod: 'POST', body: { throwInternalError: true, throwBadRequestError: false } },
+        event: {
+          httpMethod: 'POST',
+          body: { throwInternalError: true, throwBadRequestError: false },
+        },
         handler: exampleHandler,
       });
       expect(result).toMatchObject({ statusCode: 500 });
@@ -83,11 +99,18 @@ describe('createApiGatewayHandler', () => {
     it('should log a warning when an error occurs', async () => {
       const consoleWarnMock = jest.spyOn(console, 'warn');
       await invokeHandlerForTesting({
-        event: { httpMethod: 'POST', body: { throwInternalError: true, throwBadRequestError: false } },
+        event: {
+          httpMethod: 'POST',
+          body: { throwInternalError: true, throwBadRequestError: false },
+        },
         handler: exampleHandler,
       });
       expect(consoleWarnMock).toHaveBeenCalledTimes(1);
-      expect(consoleWarnMock).toHaveBeenNthCalledWith(1, 'handler.error', expect.objectContaining({ errorMessage: 'internal service error' }));
+      expect(consoleWarnMock).toHaveBeenNthCalledWith(
+        1,
+        'handler.error',
+        expect.objectContaining({ errorMessage: 'internal service error' }),
+      );
     });
     it('should return an error response, with details, to api gateway when a bad request error occurs', async () => {
       /**
@@ -95,17 +118,28 @@ describe('createApiGatewayHandler', () => {
        * - and since its a `BadRequestError` that means that we thought about the message to return
        */
       const result = await invokeHandlerForTesting({
-        event: { httpMethod: 'POST', body: { throwInternalError: false, throwBadRequestError: true } },
+        event: {
+          httpMethod: 'POST',
+          body: { throwInternalError: false, throwBadRequestError: true },
+        },
         handler: exampleHandler,
       });
       expect(result).toMatchObject({ statusCode: 400 });
       expect(result).toHaveProperty('body');
-      expect(result.body).toEqual(JSON.stringify({ errorMessage: 'bad request', errorType: 'BadRequestError' }));
+      expect(result.body).toEqual(
+        JSON.stringify({
+          errorMessage: 'bad request',
+          errorType: 'BadRequestError',
+        }),
+      );
     });
     it('should not log a warning if a BadRequestError occurs', async () => {
       const consoleWarnMock = jest.spyOn(console, 'warn');
       await invokeHandlerForTesting({
-        event: { httpMethod: 'POST', body: { throwInternalError: false, throwBadRequestError: true } },
+        event: {
+          httpMethod: 'POST',
+          body: { throwInternalError: false, throwBadRequestError: true },
+        },
         handler: exampleHandler,
       });
       expect(consoleWarnMock).toHaveBeenCalledTimes(0);
@@ -216,8 +250,10 @@ describe('createApiGatewayHandler', () => {
         },
         schema: Joi.object(),
         log: {
-          debug: (message, metadata) => debugMock(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
-          error: (message, metadata) => errorMock(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
+          debug: (message, metadata) =>
+            debugMock(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
+          error: (message, metadata) =>
+            errorMock(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
         },
         cors: { origins: '*', withCredentials: true },
       });
@@ -229,7 +265,9 @@ describe('createApiGatewayHandler', () => {
       });
       expect(result.statusCode).toEqual(200);
       expect(result.headers['Access-Control-Allow-Origin']).toEqual('*');
-      expect(debugMock).toHaveBeenNthCalledWith(1, 'handler.input', { event: { httpMethod: 'POST' } });
+      expect(debugMock).toHaveBeenNthCalledWith(1, 'handler.input', {
+        event: { httpMethod: 'POST' },
+      });
       expect(debugMock).toHaveBeenNthCalledWith(2, 'handler.output', {
         response: {
           statusCode: 200,
@@ -278,7 +316,9 @@ describe('createApiGatewayHandler', () => {
         handler: exampleHandler,
       });
       expect(result.statusCode).toEqual(400); // should return as a BadRequestError
-      expect(result.body).toContain('Errors on 1 properties were found while validating properties for lambda invocation event');
+      expect(result.body).toContain(
+        'Errors on 1 properties were found while validating properties for lambda invocation event',
+      );
       expect(result.body).not.toContain('__SENSITIVE__');
       expect(result.body).not.toContain('requestContext');
       expect(result.body).not.toContain('awsAccountId');
@@ -287,7 +327,10 @@ describe('createApiGatewayHandler', () => {
   describe('headers', () => {
     test('a handler should be able to access the Authorization header of an event payload - which is a common use case for flows using jwt', async () => {
       const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
-        logic: async (event: { headers: { Authorization: string }; body: string }) => ({
+        logic: async (event: {
+          headers: { Authorization: string };
+          body: string;
+        }) => ({
           statusCode: 200,
           body: `${event.headers.Authorization}:${event.body}`,
         }),
@@ -378,7 +421,9 @@ describe('createApiGatewayHandler', () => {
         },
         handler,
       });
-      expect(result.body).toEqual('"beefbeef-beef-beef-beef-beefbeefbeef:hello!"');
+      expect(result.body).toEqual(
+        '"beefbeef-beef-beef-beef-beefbeefbeef:hello!"',
+      );
     });
   });
   describe('serialization', () => {
@@ -386,7 +431,8 @@ describe('createApiGatewayHandler', () => {
       // otherwise, api gateway will throw an error saying "Lambda body contains the wrong type for field "body""
       const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async (event: { body: { throwBadRequestError?: boolean } }) => {
-          if (event.body.throwBadRequestError) throw new BadRequestError('you asked for it, bud');
+          if (event.body.throwBadRequestError)
+            throw new BadRequestError('you asked for it, bud');
           return {
             statusCode: 200,
             body: { hello: 'there' },
@@ -414,7 +460,8 @@ describe('createApiGatewayHandler', () => {
       // otherwise, api gateway will throw an error saying "Lambda body contains the wrong type for field "body""
       const handler: middy.Middy<any, any, Context> = createApiGatewayHandler({
         logic: async (event: { body: { throwBadRequestError?: boolean } }) => {
-          if (event.body.throwBadRequestError) throw new BadRequestError('you asked for it, bud');
+          if (event.body.throwBadRequestError)
+            throw new BadRequestError('you asked for it, bud');
           return {
             statusCode: 200,
             body: { hello: 'there' },
@@ -436,7 +483,9 @@ describe('createApiGatewayHandler', () => {
         },
         handler,
       });
-      expect(result.body).toEqual('{"errorMessage":"you asked for it, bud","errorType":"BadRequestError"}');
+      expect(result.body).toEqual(
+        '{"errorMessage":"you asked for it, bud","errorType":"BadRequestError"}',
+      );
     });
   });
   describe('deserialization', () => {
@@ -447,8 +496,10 @@ describe('createApiGatewayHandler', () => {
       schema: Joi.any(),
       log: {
         // note: we JSON.parse(JSON.stringify((...)) so that the log metadata is accessed by value, not reference (otherwise, expect to have been called with object changes over time, even after the log message results, if mocking or spying on it)
-        debug: (message, metadata) => console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
-        error: (message, metadata) => console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
+        debug: (message, metadata) =>
+          console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
+        error: (message, metadata) =>
+          console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
       },
     });
     const handlerWithoutDeserialization = createApiGatewayHandler({
@@ -458,8 +509,10 @@ describe('createApiGatewayHandler', () => {
       schema: Joi.any(),
       log: {
         // note: we JSON.parse(JSON.stringify((...)) so that the log metadata is accessed by value, not reference (otherwise, expect to have been called with object changes over time, even after the log message results, if mocking or spying on it)
-        debug: (message, metadata) => console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
-        error: (message, metadata) => console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
+        debug: (message, metadata) =>
+          console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
+        error: (message, metadata) =>
+          console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
       },
       deserialize: {
         body: false,
@@ -473,7 +526,7 @@ describe('createApiGatewayHandler', () => {
             'content-type': 'application/json; charset=utf-8', // note: required for deserialization to occur
           },
           body: JSON.stringify({ important: true }),
-        },
+        } as any,
         handler: handlerWithDeserialization,
       });
       expect(result).toMatchObject({ statusCode: 200, body: '"object"' });
@@ -487,14 +540,18 @@ describe('createApiGatewayHandler', () => {
             'content-type': 'application/json; charset=utf-8', // note: required for deserialization to occur
           },
           body: JSON.stringify({ important: true }),
-        },
+        } as any,
         handler: handlerWithDeserialization,
       });
       expect(result).toMatchObject({ statusCode: 200, body: '"object"' });
       expect(consoleLogMock).toHaveBeenNthCalledWith(
         1,
         'handler.input',
-        expect.objectContaining({ event: expect.objectContaining({ body: JSON.stringify({ important: true }) }) }),
+        expect.objectContaining({
+          event: expect.objectContaining({
+            body: JSON.stringify({ important: true }),
+          }),
+        }),
       ); // the stringified content
     });
     test('handler does not deserialize json content body if asked not to', async () => {
@@ -505,7 +562,7 @@ describe('createApiGatewayHandler', () => {
             'content-type': 'application/json; charset=utf-8', // note: required for deserialization to occur
           },
           body: JSON.stringify({ important: true }),
-        },
+        } as any,
         handler: handlerWithoutDeserialization,
       });
       expect(result).toMatchObject({ statusCode: 200, body: '"string"' });
@@ -520,8 +577,10 @@ describe('createApiGatewayHandler', () => {
         schema: Joi.object(),
         log: {
           // note: we JSON.parse(JSON.stringify((...)) so that the log metadata is accessed by value, not reference (otherwise, expect to have been called with object changes over time, even after the log message results, if mocking or spying on it)
-          debug: (message, metadata) => console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
-          error: (message, metadata) => console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
+          debug: (message, metadata) =>
+            console.log(message, JSON.parse(JSON.stringify(metadata))), // eslint-disable-line no-console
+          error: (message, metadata) =>
+            console.warn(message, JSON.parse(JSON.stringify(metadata))), //  eslint-disable-line no-console
         },
       });
       const result = await invokeHandlerForTesting({
@@ -535,7 +594,10 @@ describe('createApiGatewayHandler', () => {
         },
         handler,
       });
-      expect(result).toMatchObject({ statusCode: 200, body: '"path: /the/path"' });
+      expect(result).toMatchObject({
+        statusCode: 200,
+        body: '"path: /the/path"',
+      });
     });
   });
 });

@@ -1,6 +1,8 @@
 import middy from '@middy/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { APIGatewayProxyEventV2, APIGatewayProxyEvent } from 'aws-lambda'; // only importing types -> dev dep
+import { APIGatewayProxyEventV2, APIGatewayProxyEvent } from 'aws-lambda';
+
+// only importing types -> dev dep
 import { isV2APIGatewayEvent } from '../normalization/apiGateway';
 
 /**
@@ -14,11 +16,13 @@ import { isV2APIGatewayEvent } from '../normalization/apiGateway';
 export const apiGatewayEventShapeNormalizationMiddleware = () => {
   const before: middy.MiddlewareFunction<any, any> = async (request) => {
     // define the type of the event for usage below
-    const event: APIGatewayProxyEvent | APIGatewayProxyEventV2 = request.event as any; // note: this is a reference to the event
+    const event: APIGatewayProxyEvent | APIGatewayProxyEventV2 =
+      request.event as any; // note: this is a reference to the event
 
     // ensure that the event given to the handler always has a `path` param
     if (isV2APIGatewayEvent(event)) request.event.path = event.rawPath; // for whatever reason, apiGatewayV2 response renamed `path` -> `rawPath`, so add `path` for backwards compatibility
-    if (isV2APIGatewayEvent(event)) request.event.httpMethod = event.requestContext.http.method; // for whatever reason, apiGatewayV2 response renamed `httpMethod` -> `requestContext.http.method`, so add `httpMethod` for backwards compatibility
+    if (isV2APIGatewayEvent(event))
+      request.event.httpMethod = event.requestContext.http.method; // for whatever reason, apiGatewayV2 response renamed `httpMethod` -> `requestContext.http.method`, so add `httpMethod` for backwards compatibility
   };
   return {
     before,

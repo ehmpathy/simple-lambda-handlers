@@ -15,6 +15,7 @@
  *    - i.e., for some reason, we were not able to handle a request - and we should look into it
  */
 import middy from '@middy/core';
+
 import { HTTPStatusCode } from '../../domain/constants';
 
 /**

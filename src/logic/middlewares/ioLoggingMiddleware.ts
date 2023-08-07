@@ -1,10 +1,15 @@
 import middy from '@middy/core';
+
 import { LogMethods } from '../../domain/general';
 
 /**
  * ioLoggingMiddleware simply logs a debug message for the input and output of a lambda
  */
-export const ioLoggingMiddleware = ({ logDebug }: { logDebug: LogMethods['debug'] }) => {
+export const ioLoggingMiddleware = ({
+  logDebug,
+}: {
+  logDebug: LogMethods['debug'];
+}) => {
   const before: middy.MiddlewareFunction<any, any> = async (handler) => {
     logDebug('handler.input', { event: handler.event });
   };
@@ -19,7 +24,10 @@ export const ioLoggingMiddleware = ({ logDebug }: { logDebug: LogMethods['debug'
     }
 
     // if no response, then never handled, log the error
-    logDebug('handler.output', { errorMessage: handler.error.message, stackTrace: handler.error.stack });
+    logDebug('handler.output', {
+      errorMessage: handler.error.message,
+      stackTrace: handler.error.stack,
+    });
     return handler.error; // return error to pass it up the chain, since we're not handling it here
   };
   return {
