@@ -10,7 +10,9 @@ export const joiEventValidationMiddleware = ({
 }: {
   schema: EventSchema;
   apiGateway?: boolean;
-}) => {
+}): {
+  before: middy.MiddlewareFunction<any, any>;
+} => {
   const before: middy.MiddlewareFunction<any, any> = async (request) => {
     const eventToValidate = (() => {
       if (apiGateway) {
@@ -33,7 +35,7 @@ export const joiEventValidationMiddleware = ({
          * - only run those attributes through validation -> only risk returning that data to the client
          */
         const sanitizedApiGatewayEvent: Parameters<
-          ApiGatewayHandlerLogic<any, any>
+          ApiGatewayHandlerLogic<any, any, any>
         >[0] = {
           httpMethod: request.event.httpMethod,
           headers: request.event.headers,

@@ -43,7 +43,7 @@ export const validateAgainstSchema = async ({
 }: {
   event: any;
   schema: EventSchema;
-}) => {
+}): Promise<void> => {
   // validate the event
   const result = schema.validate(event);
 
