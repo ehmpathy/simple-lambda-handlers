@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.8.5...v0.9.0) (2023-09-16)
+
+
+### Features
+
+* **errors:** use standard ehmpathy error-fns library for bad-request-error ([44cc2cb](https://github.com/ehmpathy/simple-lambda-handlers/commit/44cc2cb8d3d511bacf08856310b39337db265f14))
+
+
+### Bug Fixes
+
+* **types:** add type safety to multiValueHeaders output ([4063d98](https://github.com/ehmpathy/simple-lambda-handlers/commit/4063d9838c300a459bf9db1f3fbc354bf7a106b5))
+
 ## [0.8.5](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.8.4...v0.8.5) (2023-08-07)
 
 
