@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { BadRequestError } from '@ehmpathy/error-fns';
 import middy from '@middy/core';
 
 import { HTTPStatusCode } from '../../domain/constants';
 import { LogMethods } from '../../domain/general';
-import { BadRequestError } from './badRequestErrorMiddleware';
 
 /**
  * as documented in `./badRequestErrorMiddleware.ts`, all errors that are not `BadRequestError` are `InternalServiceError`

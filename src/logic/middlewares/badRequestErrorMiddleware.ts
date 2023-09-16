@@ -1,19 +1,5 @@
-/**
- * Errors that ta service can produce, generically, come in two flavors:
- * - BadRequestErrors:
- *  - i.e., either in input validation or in business logic, we decide that this is a bad request.
- * - InternalServiceErrors
- *  - i.e., everything else
- *
- * For BadRequestErrors
- *  - we SHOULD NOT report that this lambda execution failed.
- *     - it did not. there was nothing wrong with how the lambda was executing.
- *     - i.e., there is no reason to debug this service. its the consumer who is wrong
- *
- * For InternalServiceErrors (i.e., any error other than "BadRequestError")
- *  - we SHOULD report that this lambda execution failed.
- *    - i.e., for some reason, we were not able to handle a request - and we should look into it
- */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { BadRequestError } from '@ehmpathy/error-fns';
 import middy from '@middy/core';
 
 import { HTTPStatusCode } from '../../domain/constants';
@@ -37,18 +23,26 @@ import { HTTPStatusCode } from '../../domain/constants';
  *
  * Tip: Use a lambda client like [simple-lambda-client](https://github.com/uladkasach/simple-lambda-client) to hydrate the error client side if invoking a lambda directly. Otherwise, if invoking an api-gateway backed lambda through rest, your typical rest client will hydrate the error when it sees statusCode != 200.
  */
-export class BadRequestError extends Error {
-  statusCode = HTTPStatusCode.CLIENT_ERROR_400;
-  constructor(message: string, metadata?: Record<string, any>) {
-    super(`${message}${metadata ? `\n\n${JSON.stringify(metadata)}` : ''}`);
-  }
-}
 
 /**
  * badRequestErrorMiddleware
  * - handles ensuring that bad-request-errors are handled and the lambda successfully returns an error response
  *   - "successfully return" meaning the lambda will not be marked as having a failure, it will successfully execute
  *   - "return an error" meaning the client will get an error object in their response payload, instead of a success response
+ *
+ * context:
+ * - errors that ta service can produce, generically, come in two flavors:
+ *   - BadRequestErrors:
+ *    - i.e., either in input validation or in business logic, we decide that this is a bad request.
+ *   - InternalServiceErrors
+ *    - i.e., everything else
+ * - for BadRequestErrors
+ *   - we SHOULD NOT report that this lambda execution failed.
+ *     - it did not. there was nothing wrong with how the lambda was executing.
+ *     - i.e., there is no reason to debug this service. its the consumer who is wrong
+ * - for InternalServiceErrors (i.e., any error other than "BadRequestError")
+ *   - we SHOULD report that this lambda execution failed.
+ *   - i.e., for some reason, we were not able to handle a request - and we should look into it
  */
 export const badRequestErrorMiddleware = (opts?: { apiGateway?: boolean }) => {
   const onError: middy.MiddlewareFunction<any, any> = async (handler) => {

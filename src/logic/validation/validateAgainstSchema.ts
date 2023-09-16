@@ -1,9 +1,9 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
+import { BadRequestError } from '@ehmpathy/error-fns';
 import { ValidationError } from 'joi';
 
 // only importing types -> dev dep
 import { EventSchema } from '../../domain/general';
-import { BadRequestError } from '../middlewares/badRequestErrorMiddleware';
 
 interface EventValidationErrorDetail {
   message: string;

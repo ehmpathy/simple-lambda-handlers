@@ -16,7 +16,8 @@ Here is a quick example that shows how you can wrap your handler logic, do addit
 
 ```ts
 // e.g., in `src/handlers/sendUserNotification.ts
-import { createStandardHandler, BadRequestError } from 'simple-lambda-handlers';
+import { BadRequestError } from '@ehmpathy/error-fns';
+import { createStandardHandler } from 'simple-lambda-handlers';
 import Joi from 'joi';
 
 const schema = Joi.object().keys({
@@ -57,7 +58,7 @@ Here is an example that supports CORS with credentials as well as an auth token 
 
 ```ts
 // e.g., in `src/handlers/sendUserNotification.ts
-import { createApiGatewayHandler, BadRequestError, ApiGatewayHandlerLogic, HTTPStatusCode } from 'simple-lambda-handlers';
+import { createApiGatewayHandler, ApiGatewayHandlerLogic, HTTPStatusCode } from 'simple-lambda-handlers';
 import Joi from 'joi';
 
 const schema = Joi.object()
@@ -136,10 +137,13 @@ Sometimes users make requests that are invalid - or don't make logical sense. Th
 
 This library takes care of that, so that the only errors that are reported as invocation errors in cloudwatch are those that were unexpected or really were internal service errors.
 
+*Tip: use a lambda client like [simple-lambda-client](https://github.com/uladkasach/simple-lambda-client) to hydrate the error for the caller if invoking a lambda directly*
+
 Example:
 
 ```ts
-import { BadRequestError } from 'simple-lambda-handlers';
+import { BadRequestError } from '@ehmpathy/error-fns';
+
 // ...
 const user = await findUserByUuid({ uuid });
 if (!user) throw new BadRequestError(`user not found for uuid '${uuid}'`);

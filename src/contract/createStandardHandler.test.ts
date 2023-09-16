@@ -1,9 +1,9 @@
+import { BadRequestError } from '@ehmpathy/error-fns';
 import middy from '@middy/core';
 import { Context } from 'aws-lambda';
 import Joi from 'joi';
 import { invokeHandlerForTesting } from 'simple-lambda-testing-methods';
 
-import { BadRequestError } from '../logic/middlewares/badRequestErrorMiddleware';
 import { createStandardHandler } from './createStandardHandler';
 
 describe('createStandardHandler', () => {
@@ -79,7 +79,7 @@ describe('createStandardHandler', () => {
       handler: exampleHandler,
     });
     expect(result).toMatchObject({
-      errorMessage: 'bad request',
+      errorMessage: 'BadRequestError: bad request',
       errorType: 'BadRequestError',
     });
     expect(consoleWarnMock).not.toHaveBeenCalled();

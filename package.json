@@ -19,14 +19,14 @@
   "peerDependencies": {
     "joi": "17.x"
   },
-  "license": "MIT",
-  "main": "dist/index.js",
   "engines": {
     "node": ">=8.0.0"
   },
   "files": [
     "/dist"
   ],
+  "license": "MIT",
+  "main": "dist/index.js",
   "scripts": {
     "build:ts": "tsc -p ./tsconfig.build.json",
     "commit:with-cli": "npx cz",
@@ -55,6 +55,7 @@
     "postinstall": "[ -d .git ] && npx husky install || exit 0"
   },
   "dependencies": {
+    "@ehmpathy/error-fns": "1.0.2",
     "@middy/core": "1.5.2",
     "@middy/http-cors": "1.4.0",
     "@middy/http-json-body-parser": "1.4.0",
@@ -75,7 +76,7 @@
     "core-js": "3.26.1",
     "cz-conventional-changelog": "3.3.0",
     "declapract": "^0.11.2",
-    "declapract-typescript-ehmpathy": "^0.25.7",
+    "declapract-typescript-ehmpathy": "^0.27.2",
     "depcheck": "1.4.3",
     "eslint": "8.30.0",
     "eslint-config-airbnb-typescript": "17.0.0",

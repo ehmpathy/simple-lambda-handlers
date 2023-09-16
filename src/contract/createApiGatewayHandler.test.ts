@@ -1,9 +1,9 @@
+import { BadRequestError } from '@ehmpathy/error-fns';
 import middy from '@middy/core';
 import { Context } from 'aws-lambda';
 import Joi from 'joi';
 import { invokeHandlerForTesting } from 'simple-lambda-testing-methods';
 
-import { BadRequestError } from '../logic/middlewares/badRequestErrorMiddleware';
 import { createApiGatewayHandler } from './createApiGatewayHandler';
 
 describe('createApiGatewayHandler', () => {
@@ -128,7 +128,7 @@ describe('createApiGatewayHandler', () => {
       expect(result).toHaveProperty('body');
       expect(result.body).toEqual(
         JSON.stringify({
-          errorMessage: 'bad request',
+          errorMessage: 'BadRequestError: bad request',
           errorType: 'BadRequestError',
         }),
       );
@@ -484,7 +484,7 @@ describe('createApiGatewayHandler', () => {
         handler,
       });
       expect(result.body).toEqual(
-        '{"errorMessage":"you asked for it, bud","errorType":"BadRequestError"}',
+        '{"errorMessage":"BadRequestError: you asked for it, bud","errorType":"BadRequestError"}',
       );
     });
   });
