@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.9.0...v0.9.1) (2024-07-06)
+
+
+### Bug Fixes
+
+* **errors:** support bad request errors from any package ([dca5539](https://github.com/ehmpathy/simple-lambda-handlers/commit/dca55390505f76f804c7625ce364392ae7c9943d))
+
 ## [0.9.0](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.8.5...v0.9.0) (2023-09-16)
 
 
