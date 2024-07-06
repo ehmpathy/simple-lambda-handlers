@@ -5,6 +5,16 @@ import middy from '@middy/core';
 import { HTTPStatusCode } from '../../domain/constants';
 
 /**
+ * .what = procedure for deciding whether an error is a bad request error
+ */
+export const decideIsBadRequestError = ({ error }: { error: Error }) => {
+  const isInstanceOfBadRequestError = error instanceof BadRequestError;
+  const isNamedAfterBadRequestError =
+    error.constructor.name === 'BadRequestError';
+  return isInstanceOfBadRequestError || isNamedAfterBadRequestError;
+};
+
+/**
  * BadRequestError
  * - thrown when a lambda successfully decides a request was invalid
  * - enables conveniently specifying that
@@ -47,7 +57,8 @@ import { HTTPStatusCode } from '../../domain/constants';
 export const badRequestErrorMiddleware = (opts?: { apiGateway?: boolean }) => {
   const onError: middy.MiddlewareFunction<any, any> = async (handler) => {
     // 1. check if the error was due to a bad request from the user. if it was, just return the error object, so its not reported as our lambda breaking in aws cloudwatch
-    if (handler.error instanceof BadRequestError) {
+    const isBadRequestError = decideIsBadRequestError({ error: handler.error });
+    if (isBadRequestError) {
       // determine how to format the response, based on whether the response is for api gateway or standard invocation
       const response = opts?.apiGateway
         ? {
