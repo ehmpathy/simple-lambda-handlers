@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.9.1...v0.9.2) (2024-08-18)
+
+
+### Bug Fixes
+
+* **logs:** expose error.cause message and trace if available ([de0f3f5](https://github.com/ehmpathy/simple-lambda-handlers/commit/de0f3f52a8e6ab269e218d388184b9a1ce4425f1))
+
 ## [0.9.1](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.9.0...v0.9.1) (2024-07-06)
 
 
