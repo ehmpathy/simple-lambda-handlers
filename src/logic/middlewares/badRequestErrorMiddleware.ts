@@ -66,12 +66,23 @@ export const badRequestErrorMiddleware = (opts?: { apiGateway?: boolean }) => {
             body: {
               errorMessage: handler.error.message,
               errorType: 'BadRequestError',
+              ...(handler.error.cause instanceof Error
+                ? {
+                    causeMessage: handler.error.cause.message,
+                  }
+                : {}),
             },
           }
         : {
             errorMessage: handler.error.message,
             errorType: 'BadRequestError',
             stackTrace: handler.error.stack,
+            ...(handler.error.cause instanceof Error
+              ? {
+                  causeMessage: handler.error.cause.message,
+                  causeTrace: handler.error.cause.stack,
+                }
+              : {}),
           };
 
       // report the error to the user in the response
