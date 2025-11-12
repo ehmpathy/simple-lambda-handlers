@@ -143,7 +143,13 @@ export const createApiGatewayHandler = <
   const middlewares = [
     badRequestErrorMiddleware({ apiGateway: true }), // handle BadRequestErrors appropriately (i.e., dont log it as an error, but report to the user what failed)
     internalServiceErrorMiddleware({ logError: log.error, apiGateway: true }), // log that we had an error loudly and cast it into a standard response
-    ioLoggingMiddleware({ logDebug: log.debug }), // log the input and output to the lambda, for debugging
+    ioLoggingMiddleware({
+      logDebug: log.debug,
+      logTranslate: {
+        input: (event) => ({ event }),
+        output: (result) => ({ response: result }),
+      },
+    }), // log the input and output to the lambda, for debugging
     ...(cors ? [httpCors(corsInputToCorsConfig(cors))] : []), // adds cors headers to response, if cors was requested
     httpSecurityHeaders(), // adds best practice headers to the request; (!) note, also handles any uncaught errors to return them as statusCode: 500 responses
     ...(deserialize.body ? [httpRequestJsonBodyParser()] : []), // converts JSON body to object, when present; throws UnprocessableEntity (422 errors) for malformed json

@@ -94,4 +94,149 @@ describe('createStandardHandler', () => {
       'Errors on 1 properties were found while validating properties for lambda invocation event',
     );
   });
+
+  describe('with input and output transformers', () => {
+    let handlerWithTransformers: middy.Middy<any, any, Context>;
+    const debugLogs: Array<{ message: string; metadata: any }> = [];
+    const errorLogs: Array<{ message: string; metadata: any }> = [];
+
+    beforeEach(() => {
+      debugLogs.length = 0;
+      errorLogs.length = 0;
+      handlerWithTransformers = createStandardHandler({
+        logic: async (event: {
+          sensitiveData: string;
+          publicData: string;
+          throwError?: boolean;
+        }) => {
+          if (event.throwError) throw new Error('test error');
+          return {
+            result: 'success',
+            secretToken: 'should-be-sanitized',
+          };
+        },
+        schema: Joi.object().keys({
+          sensitiveData: Joi.string().required(),
+          publicData: Joi.string().required(),
+          throwError: Joi.boolean().optional(),
+        }),
+        log: {
+          methods: {
+            debug: (message, metadata) => {
+              debugLogs.push({ message, metadata });
+            },
+            error: (message, metadata) => {
+              errorLogs.push({ message, metadata });
+            },
+          },
+          input: (event) => ({ event: { publicData: event.publicData } }),
+          output: (result) => ({ response: { result: result.result } }),
+        },
+      });
+    });
+
+    it('should use inputTransformer to sanitize input logs', async () => {
+      const event = {
+        sensitiveData: 'secret-password',
+        publicData: 'public-info',
+      };
+      await invokeHandlerForTesting({
+        event,
+        handler: handlerWithTransformers,
+      });
+
+      const inputLog = debugLogs.find((log) => log.message === 'handler.input');
+      expect(inputLog).toBeDefined();
+      expect(inputLog?.metadata).toEqual({
+        event: { publicData: 'public-info' },
+      });
+      expect(JSON.stringify(inputLog?.metadata)).not.toContain(
+        'secret-password',
+      );
+    });
+
+    it('should use outputTransformer to sanitize output logs', async () => {
+      const event = {
+        sensitiveData: 'secret-password',
+        publicData: 'public-info',
+      };
+      await invokeHandlerForTesting({
+        event,
+        handler: handlerWithTransformers,
+      });
+
+      const outputLog = debugLogs.find(
+        (log) => log.message === 'handler.output',
+      );
+      expect(outputLog).toBeDefined();
+      expect(outputLog?.metadata).toEqual({
+        response: { result: 'success' },
+      });
+      expect(JSON.stringify(outputLog?.metadata)).not.toContain(
+        'should-be-sanitized',
+      );
+    });
+
+    it('should use outputTransformer on error responses', async () => {
+      const event = {
+        sensitiveData: 'secret-password',
+        publicData: 'public-info',
+        throwError: true,
+      };
+
+      try {
+        await invokeHandlerForTesting({
+          event,
+          handler: handlerWithTransformers,
+        });
+        throw new Error('should not reach here');
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        expect(error.message).toContain('test error');
+
+        // The output log should still be created (for the error case)
+        const outputLog = debugLogs.find(
+          (log) => log.message === 'handler.output',
+        );
+        expect(outputLog).toBeDefined();
+      }
+    });
+
+    it('should work with simple LogMethods (backward compatibility)', async () => {
+      const simpleLogs: Array<{ message: string; metadata: any }> = [];
+      const simpleHandler = createStandardHandler({
+        logic: async (_event: { data: string }) => {
+          return { result: 'ok' };
+        },
+        schema: Joi.object().keys({
+          data: Joi.string().required(),
+        }),
+        log: {
+          debug: (message, metadata) => {
+            simpleLogs.push({ message, metadata });
+          },
+          error: (message, metadata) => {
+            simpleLogs.push({ message, metadata });
+          },
+        },
+      });
+
+      await invokeHandlerForTesting({
+        event: { data: 'test' },
+        handler: simpleHandler,
+      });
+
+      const inputLog = simpleLogs.find(
+        (log) => log.message === 'handler.input',
+      );
+      expect(inputLog).toBeDefined();
+      expect(inputLog?.metadata).toEqual({ event: { data: 'test' } });
+
+      const outputLog = simpleLogs.find(
+        (log) => log.message === 'handler.output',
+      );
+      expect(outputLog).toBeDefined();
+      expect(outputLog?.metadata).toEqual({ response: { result: 'ok' } });
+    });
+  });
 });
