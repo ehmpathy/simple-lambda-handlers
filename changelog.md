@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.0](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.9.2...v0.10.0) (2025-11-12)
+
+
+### Features
+
+* **logs:** enable translation of input and output debug logs before emission ([831d935](https://github.com/ehmpathy/simple-lambda-handlers/commit/831d93552a3d997e53ba5481addda7bbc8ddf226))
+
+
+### Bug Fixes
+
+* **cicd:** bump ghactions runners ([728ae17](https://github.com/ehmpathy/simple-lambda-handlers/commit/728ae17c0af51a529a375002663f9c3dbe5f22f2))
+* **deps:** npm audit fix ([a45464e](https://github.com/ehmpathy/simple-lambda-handlers/commit/a45464e39df7269278984c3e13d5f4e078416a0f))
+* **practs:** bump to latest best ([1bc7b50](https://github.com/ehmpathy/simple-lambda-handlers/commit/1bc7b5007c6d3bcabc2a0e3a07fe98b016435d23))
+
 ## [0.9.2](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.9.1...v0.9.2) (2024-08-18)
 
 
