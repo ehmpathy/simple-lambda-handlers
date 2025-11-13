@@ -124,7 +124,29 @@ export const createApiGatewayHandler = <
 }: {
   logic: ApiGatewayHandlerLogic<I, O, IH>;
   schema: EventSchema; // for event validation
-  log: LogMethods; // for standard logging
+  log:
+    | LogMethods
+    | {
+        /**
+         * .what = the log methods to use
+         */
+        methods: LogMethods;
+        /**
+         * .what = how to translate the input before logging it
+         * .why = sanitize noisey or sensitive info, out of the logs
+         */
+        input?: (
+          event: Parameters<ApiGatewayHandlerLogic<I, O, IH>>[0],
+        ) => Record<string, any>;
+
+        /**
+         * .what = how to translate the output before logging it
+         * .why = sanitize noisey or sensitive info, out of the logs
+         */
+        output?: (
+          result: ReturnType<ApiGatewayHandlerLogic<I, O, IH>>,
+        ) => Record<string, any>;
+      };
   cors?: CORSOptions; // for returning coors if desired; allows a subset of `httpCors` options
   deserialize?: {
     /**
@@ -140,15 +162,33 @@ export const createApiGatewayHandler = <
   ReturnType<ApiGatewayHandlerLogic<I, O, IH>>,
   Context
 > => {
+  // extract log methods and optional translators from the log parameter
+  const logMethods: LogMethods =
+    'debug' in log ? log : (log as { methods: LogMethods }).methods;
+  const logTranslate = {
+    input:
+      'input' in log
+        ? log.input!
+        : (event: Parameters<ApiGatewayHandlerLogic<I, O, IH>>[0]) => ({
+            event,
+          }),
+    output:
+      'output' in log
+        ? log.output!
+        : (result: ReturnType<ApiGatewayHandlerLogic<I, O, IH>>) => ({
+            response: result,
+          }),
+  };
+
   const middlewares = [
     badRequestErrorMiddleware({ apiGateway: true }), // handle BadRequestErrors appropriately (i.e., dont log it as an error, but report to the user what failed)
-    internalServiceErrorMiddleware({ logError: log.error, apiGateway: true }), // log that we had an error loudly and cast it into a standard response
+    internalServiceErrorMiddleware({
+      logError: logMethods.error,
+      apiGateway: true,
+    }), // log that we had an error loudly and cast it into a standard response
     ioLoggingMiddleware({
-      logDebug: log.debug,
-      logTranslate: {
-        input: (event) => ({ event }),
-        output: (result) => ({ response: result }),
-      },
+      logDebug: logMethods.debug,
+      logTranslate,
     }), // log the input and output to the lambda, for debugging
     ...(cors ? [httpCors(corsInputToCorsConfig(cors))] : []), // adds cors headers to response, if cors was requested
     httpSecurityHeaders(), // adds best practice headers to the request; (!) note, also handles any uncaught errors to return them as statusCode: 500 responses

@@ -600,4 +600,295 @@ describe('createApiGatewayHandler', () => {
       });
     });
   });
+
+  describe('with input and output transformers', () => {
+    let handlerWithTransformers: middy.Middy<any, any, Context>;
+    const debugLogs: Array<{ message: string; metadata: any }> = [];
+    const errorLogs: Array<{ message: string; metadata: any }> = [];
+
+    beforeEach(() => {
+      debugLogs.length = 0;
+      errorLogs.length = 0;
+      handlerWithTransformers = createApiGatewayHandler({
+        logic: async (event: {
+          headers: { authorization?: string };
+          body: {
+            sensitiveData: string;
+            publicData: string;
+            throwError?: boolean;
+          };
+        }) => {
+          if (event.body.throwError) throw new Error('test error');
+          return {
+            statusCode: 200,
+            body: {
+              result: 'success',
+              secretToken: 'should-be-sanitized',
+            },
+          };
+        },
+        schema: Joi.object().keys({
+          httpMethod: Joi.string().required(),
+          headers: Joi.object().optional(),
+          body: Joi.object()
+            .keys({
+              sensitiveData: Joi.string().required(),
+              publicData: Joi.string().required(),
+              throwError: Joi.boolean().optional(),
+            })
+            .required(),
+        }),
+        log: {
+          methods: {
+            debug: (message, metadata) => {
+              debugLogs.push({ message, metadata });
+            },
+            error: (message, metadata) => {
+              errorLogs.push({ message, metadata });
+            },
+          },
+          input: (event) => ({
+            event: {
+              httpMethod: event.httpMethod,
+              body: { publicData: event.body.publicData },
+            },
+          }),
+          output: (result: any) => {
+            // Parse the body back since it's been serialized already
+            const parsedBody =
+              result.body && typeof result.body === 'string'
+                ? JSON.parse(result.body)
+                : result.body;
+            return {
+              response: {
+                statusCode: result.statusCode,
+                body: parsedBody ? { result: parsedBody.result } : undefined,
+              },
+            };
+          },
+        },
+      });
+    });
+
+    it('should use inputTransformer to sanitize input logs', async () => {
+      const event = {
+        httpMethod: 'POST',
+        headers: {
+          authorization: 'Bearer secret-token',
+        },
+        body: {
+          sensitiveData: 'secret-password',
+          publicData: 'public-info',
+        },
+      };
+      await invokeHandlerForTesting({
+        event,
+        handler: handlerWithTransformers,
+      });
+
+      const inputLog = debugLogs.find((log) => log.message === 'handler.input');
+      expect(inputLog).toBeDefined();
+      expect(inputLog?.metadata).toEqual({
+        event: {
+          httpMethod: 'POST',
+          body: { publicData: 'public-info' },
+        },
+      });
+      expect(JSON.stringify(inputLog?.metadata)).not.toContain(
+        'secret-password',
+      );
+      expect(JSON.stringify(inputLog?.metadata)).not.toContain('secret-token');
+    });
+
+    it('should use outputTransformer to sanitize output logs', async () => {
+      const event = {
+        httpMethod: 'POST',
+        body: {
+          sensitiveData: 'secret-password',
+          publicData: 'public-info',
+        },
+      };
+      await invokeHandlerForTesting({
+        event,
+        handler: handlerWithTransformers,
+      });
+
+      const outputLog = debugLogs.find(
+        (log) => log.message === 'handler.output',
+      );
+      expect(outputLog).toBeDefined();
+      expect(outputLog?.metadata).toEqual({
+        response: {
+          statusCode: 200,
+          body: { result: 'success' },
+        },
+      });
+      expect(JSON.stringify(outputLog?.metadata)).not.toContain(
+        'should-be-sanitized',
+      );
+    });
+
+    it('should use outputTransformer on error responses', async () => {
+      const event = {
+        httpMethod: 'POST',
+        body: {
+          sensitiveData: 'secret-password',
+          publicData: 'public-info',
+          throwError: true,
+        },
+      };
+
+      await invokeHandlerForTesting({
+        event,
+        handler: handlerWithTransformers,
+      });
+
+      // The output log should still be created (for the error case)
+      const outputLog = debugLogs.find(
+        (log) => log.message === 'handler.output',
+      );
+      expect(outputLog).toBeDefined();
+    });
+
+    it('should work with simple LogMethods (backward compatibility)', async () => {
+      const simpleLogs: Array<{ message: string; metadata: any }> = [];
+      const simpleHandler = createApiGatewayHandler({
+        logic: async (_event: { body: { data: string } }) => {
+          return { statusCode: 200, body: { result: 'ok' } };
+        },
+        schema: Joi.object().keys({
+          httpMethod: Joi.string().required(),
+          body: Joi.object()
+            .keys({
+              data: Joi.string().required(),
+            })
+            .required(),
+        }),
+        log: {
+          debug: (message, metadata) => {
+            simpleLogs.push({ message, metadata });
+          },
+          error: (message, metadata) => {
+            simpleLogs.push({ message, metadata });
+          },
+        },
+      });
+
+      await invokeHandlerForTesting({
+        event: { httpMethod: 'POST', body: { data: 'test' } } as any,
+        handler: simpleHandler,
+      });
+
+      const inputLog = simpleLogs.find(
+        (log) => log.message === 'handler.input',
+      );
+      expect(inputLog).toBeDefined();
+      expect(inputLog?.metadata).toEqual({
+        event: { httpMethod: 'POST', body: { data: 'test' } },
+      });
+
+      const outputLog = simpleLogs.find(
+        (log) => log.message === 'handler.output',
+      );
+      expect(outputLog).toBeDefined();
+      expect(outputLog?.metadata).toEqual({
+        response: expect.objectContaining({
+          statusCode: 200,
+          body: '{"result":"ok"}',
+        }),
+      });
+    });
+
+    it('should use input translator when only input is provided, while still using default output action', async () => {
+      const partialTransformLogs: Array<{ message: string; metadata: any }> =
+        [];
+      const partialTransformHandler = createApiGatewayHandler({
+        logic: async (_event: {
+          body: { sensitiveData: string; publicData: string };
+        }) => {
+          return {
+            statusCode: 200,
+            body: {
+              result: 'success',
+              secretToken: 'should-appear-in-default-output',
+            },
+          };
+        },
+        schema: Joi.object().keys({
+          httpMethod: Joi.string().required(),
+          body: Joi.object()
+            .keys({
+              sensitiveData: Joi.string().required(),
+              publicData: Joi.string().required(),
+            })
+            .required(),
+        }),
+        log: {
+          methods: {
+            debug: (message, metadata) => {
+              partialTransformLogs.push({ message, metadata });
+            },
+            error: (message, metadata) => {
+              partialTransformLogs.push({ message, metadata });
+            },
+          },
+          input: (event) => ({
+            event: {
+              httpMethod: event.httpMethod,
+              body: { publicData: event.body.publicData },
+            },
+          }),
+          // Note: output is intentionally not provided
+        },
+      });
+
+      const event = {
+        httpMethod: 'POST',
+        body: {
+          sensitiveData: 'secret-password',
+          publicData: 'public-info',
+        },
+      };
+      const result = await invokeHandlerForTesting({
+        event: event as any,
+        handler: partialTransformHandler,
+      });
+
+      // Verify input transformer was used
+      const inputLog = partialTransformLogs.find(
+        (log) => log.message === 'handler.input',
+      );
+      expect(inputLog).toBeDefined();
+      expect(inputLog?.metadata).toEqual({
+        event: {
+          httpMethod: 'POST',
+          body: { publicData: 'public-info' },
+        },
+      });
+      expect(JSON.stringify(inputLog?.metadata)).not.toContain(
+        'secret-password',
+      );
+
+      // Verify output uses default transformer (wraps full result in { response: ... })
+      const outputLog = partialTransformLogs.find(
+        (log) => log.message === 'handler.output',
+      );
+      expect(outputLog).toBeDefined();
+      expect(outputLog?.metadata).toEqual({
+        response: expect.objectContaining({
+          statusCode: 200,
+          body: '{"result":"success","secretToken":"should-appear-in-default-output"}',
+        }),
+      });
+      expect(JSON.stringify(outputLog?.metadata)).toContain(
+        'should-appear-in-default-output',
+      );
+
+      // Verify the actual result is correct
+      expect(result).toMatchObject({
+        statusCode: 200,
+        body: '{"result":"success","secretToken":"should-appear-in-default-output"}',
+      });
+    });
+  });
 });

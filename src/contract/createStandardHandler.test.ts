@@ -238,5 +238,79 @@ describe('createStandardHandler', () => {
       expect(outputLog).toBeDefined();
       expect(outputLog?.metadata).toEqual({ response: { result: 'ok' } });
     });
+
+    it('should use input translator when only input is provided, while still using default output action', async () => {
+      const partialTransformLogs: Array<{ message: string; metadata: any }> =
+        [];
+      const partialTransformHandler = createStandardHandler({
+        logic: async (_event: {
+          sensitiveData: string;
+          publicData: string;
+        }) => {
+          return {
+            result: 'success',
+            secretToken: 'should-appear-in-default-output',
+          };
+        },
+        schema: Joi.object().keys({
+          sensitiveData: Joi.string().required(),
+          publicData: Joi.string().required(),
+        }),
+        log: {
+          methods: {
+            debug: (message, metadata) => {
+              partialTransformLogs.push({ message, metadata });
+            },
+            error: (message, metadata) => {
+              partialTransformLogs.push({ message, metadata });
+            },
+          },
+          input: (event) => ({ event: { publicData: event.publicData } }),
+          // Note: output is intentionally not provided
+        },
+      });
+
+      const event = {
+        sensitiveData: 'secret-password',
+        publicData: 'public-info',
+      };
+      const result = await invokeHandlerForTesting({
+        event,
+        handler: partialTransformHandler,
+      });
+
+      // Verify input transformer was used
+      const inputLog = partialTransformLogs.find(
+        (log) => log.message === 'handler.input',
+      );
+      expect(inputLog).toBeDefined();
+      expect(inputLog?.metadata).toEqual({
+        event: { publicData: 'public-info' },
+      });
+      expect(JSON.stringify(inputLog?.metadata)).not.toContain(
+        'secret-password',
+      );
+
+      // Verify output uses default transformer (wraps full result in { response: ... })
+      const outputLog = partialTransformLogs.find(
+        (log) => log.message === 'handler.output',
+      );
+      expect(outputLog).toBeDefined();
+      expect(outputLog?.metadata).toEqual({
+        response: {
+          result: 'success',
+          secretToken: 'should-appear-in-default-output',
+        },
+      });
+      expect(JSON.stringify(outputLog?.metadata)).toContain(
+        'should-appear-in-default-output',
+      );
+
+      // Verify the actual result is correct
+      expect(result).toEqual({
+        result: 'success',
+        secretToken: 'should-appear-in-default-output',
+      });
+    });
   });
 });

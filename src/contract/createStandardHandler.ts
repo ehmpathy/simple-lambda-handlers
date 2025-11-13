@@ -17,6 +17,9 @@ export const createStandardHandler = <I, O>({
   log:
     | LogMethods
     | {
+        /**
+         * .what = the log methods to use
+         */
         methods: LogMethods;
         /**
          * .what = how to translate the input before logging it
@@ -34,13 +37,11 @@ export const createStandardHandler = <I, O>({
   // extract log methods and optional translators from the log parameter
   const logMethods: LogMethods =
     'debug' in log ? log : (log as { methods: LogMethods }).methods;
-  const logTranslate =
-    ('input' in log || 'output' in log) && log.input && log.output
-      ? { input: log.input, output: log.output }
-      : {
-          input: (event: I) => ({ event }),
-          output: (result: O) => ({ response: result }),
-        };
+  const logTranslate = {
+    input: 'input' in log ? log.input! : (event: I) => ({ event }),
+    output:
+      'output' in log ? log.output! : (result: O) => ({ response: result }),
+  };
 
   return middy(logic)
     .use(
