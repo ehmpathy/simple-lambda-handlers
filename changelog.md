@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.10.0...v0.10.1) (2025-11-13)
+
+
+### Bug Fixes
+
+* **logs:** ensure partial log transformer choices are respected ([9586fbe](https://github.com/ehmpathy/simple-lambda-handlers/commit/9586fbeb7f909ccf6f3e227e1b573344aa9098f3))
+
 ## [0.10.0](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.9.2...v0.10.0) (2025-11-12)
 
 
