@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.2](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.10.1...v0.10.2) (2025-11-28)
+
+
+### Bug Fixes
+
+* **pkg:** forward middy export to eliminate not-portable tsc errors ([1c62936](https://github.com/ehmpathy/simple-lambda-handlers/commit/1c62936d95f3fe1be48f8cb818e8e2239b59dfd5))
+
 ## [0.10.1](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.10.0...v0.10.1) (2025-11-13)
 
 
