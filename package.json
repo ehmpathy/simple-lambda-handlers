@@ -2,7 +2,7 @@
   "name": "simple-lambda-handlers",
   "author": "ehmpathy",
   "description": "a simple and opinionated lambda handler library, built with middy",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "repository": "ehmpathy/simple-lambda-handlers",
   "homepage": "https://github.com/ehmpathy/simple-lambda-handlers",
   "keywords": [
