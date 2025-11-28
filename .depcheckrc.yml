@@ -5,10 +5,11 @@ ignores:
   - '@commitlint/config-conventional'
   - '@trivago/prettier-plugin-sort-imports'
   - '@tsconfig/node-lts-strictest'
-  - serverless-prune-plugin
+  - babel-jest
   - core-js
   - ts-jest
-  - ts-node
-  - date-fns
+  - tsx
   - husky
   - if-env
+  - test-fns
+  - helpful-errors

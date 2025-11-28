@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { BadRequestError } from '@ehmpathy/error-fns';
+import { BadRequestError } from 'helpful-errors';
 import { ValidationError } from 'joi';
 
 // only importing types -> dev dep

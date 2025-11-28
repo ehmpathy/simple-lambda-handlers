@@ -1,7 +1,11 @@
 import middy from '@middy/core';
 import type { Context } from 'aws-lambda';
 
-import { EventSchema, HandlerLogic, LogMethods } from '../domain/general';
+import {
+  type EventSchema,
+  type HandlerLogic,
+  type LogMethods,
+} from '../domain/general';
 import { badRequestErrorMiddleware } from '../logic/middlewares/badRequestErrorMiddleware';
 import { internalServiceErrorMiddleware } from '../logic/middlewares/internalServiceErrorMiddleware';
 import { ioLoggingMiddleware } from '../logic/middlewares/ioLoggingMiddleware';

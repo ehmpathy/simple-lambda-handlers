@@ -16,7 +16,7 @@ Here is a quick example that shows how you can wrap your handler logic, do addit
 
 ```ts
 // e.g., in `src/handlers/sendUserNotification.ts
-import { BadRequestError } from '@ehmpathy/error-fns';
+import { BadRequestError } from 'helpful-errors';
 import { createStandardHandler } from 'simple-lambda-handlers';
 import Joi from 'joi';
 
@@ -142,7 +142,7 @@ This library takes care of that, so that the only errors that are reported as in
 Example:
 
 ```ts
-import { BadRequestError } from '@ehmpathy/error-fns';
+import { BadRequestError } from 'helpful-errors';
 
 // ...
 const user = await findUserByUuid({ uuid });

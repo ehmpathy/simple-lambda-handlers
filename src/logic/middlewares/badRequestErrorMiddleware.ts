@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { BadRequestError } from '@ehmpathy/error-fns';
+import { BadRequestError } from 'helpful-errors';
 import middy from '@middy/core';
 
 import { HTTPStatusCode } from '../../domain/constants';

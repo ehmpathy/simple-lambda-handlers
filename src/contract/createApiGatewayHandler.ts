@@ -9,8 +9,12 @@ import type {
   Context,
 } from 'aws-lambda';
 
-import { HTTPStatusCode } from '../domain/constants';
-import { EventSchema, HandlerLogic, LogMethods } from '../domain/general';
+import { type HTTPStatusCode } from '../domain/constants';
+import {
+  type EventSchema,
+  type HandlerLogic,
+  type LogMethods,
+} from '../domain/general';
 import { apiGatewayEventShapeNormalizationMiddleware } from '../logic/middlewares/apiGatewayEventShapeNormalizationMiddleware';
 import { badRequestErrorMiddleware } from '../logic/middlewares/badRequestErrorMiddleware';
 import { internalServiceErrorMiddleware } from '../logic/middlewares/internalServiceErrorMiddleware';

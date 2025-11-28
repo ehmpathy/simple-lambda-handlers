@@ -5,6 +5,7 @@
 .artifact
 .env
 .serverless
+.temp
 .terraform
 .terraform.lock
 .yalc

@@ -1,8 +1,5 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-// only importing types -> dev dep
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { Context } from 'aws-lambda';
-import { Schema as JoiSchema } from 'joi';
+import { type Context } from 'aws-lambda';
+import { type Schema as JoiSchema } from 'joi';
 
 // only importing types -> dev dep
 
