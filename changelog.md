@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.4](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.10.3...v0.10.4) (2025-12-02)
+
+
+### Bug Fixes
+
+* **4xx:** identify bad requests that extend bad request error cross package ([#44](https://github.com/ehmpathy/simple-lambda-handlers/issues/44)) ([43c5a86](https://github.com/ehmpathy/simple-lambda-handlers/commit/43c5a8686afbab5f69e2a8b19376b1bc7f65368f))
+
 ## [0.10.3](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.10.2...v0.10.3) (2025-11-28)
 
 
