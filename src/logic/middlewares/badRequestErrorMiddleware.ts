@@ -1,5 +1,5 @@
+import type middy from '@middy/core';
 import { BadRequestError } from 'helpful-errors';
-import middy from '@middy/core';
 
 import { HTTPStatusCode } from '../../domain/constants';
 

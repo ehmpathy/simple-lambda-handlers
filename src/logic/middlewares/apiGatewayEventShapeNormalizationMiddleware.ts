@@ -1,6 +1,5 @@
-import middy from '@middy/core';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { APIGatewayProxyEventV2, APIGatewayProxyEvent } from 'aws-lambda';
+import type middy from '@middy/core';
+import type { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from 'aws-lambda';
 
 // only importing types -> dev dep
 import { isV2APIGatewayEvent } from '../normalization/apiGateway';

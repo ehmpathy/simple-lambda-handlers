@@ -1,6 +1,6 @@
-import { BadRequestError } from 'helpful-errors';
 import type middy from '@middy/core';
-import { type Context } from 'aws-lambda';
+import type { Context } from 'aws-lambda';
+import { BadRequestError } from 'helpful-errors';
 import Joi from 'joi';
 import { invokeHandlerForTesting } from 'simple-lambda-testing-methods';
 

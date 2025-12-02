@@ -1,7 +1,7 @@
-import middy from '@middy/core';
+import type middy from '@middy/core';
 
-import { ApiGatewayHandlerLogic } from '../..';
-import { EventSchema } from '../../domain/general';
+import type { ApiGatewayHandlerLogic } from '../..';
+import type { EventSchema } from '../../domain/general';
 import { validateAgainstSchema } from '../validation/validateAgainstSchema';
 
 export const joiEventValidationMiddleware = ({

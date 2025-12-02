@@ -1,5 +1,5 @@
-import { type Context } from 'aws-lambda';
-import { type Schema as JoiSchema } from 'joi';
+import type { Context } from 'aws-lambda';
+import type { Schema as JoiSchema } from 'joi';
 
 // only importing types -> dev dep
 
