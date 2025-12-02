@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.5](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.10.4...v0.10.5) (2025-12-02)
+
+
+### Bug Fixes
+
+* **practs:** bump to latest best ([#46](https://github.com/ehmpathy/simple-lambda-handlers/issues/46)) ([504792e](https://github.com/ehmpathy/simple-lambda-handlers/commit/504792e1b8ce11d3929b9cc1f1d534c49dd1feed))
+
 ## [0.10.4](https://github.com/ehmpathy/simple-lambda-handlers/compare/v0.10.3...v0.10.4) (2025-12-02)
 
 
