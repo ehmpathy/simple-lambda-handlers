@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import middy from '@middy/core';
+import type middy from '@middy/core';
 
 import { HTTPStatusCode } from '../../domain/constants';
-import { LogMethods } from '../../domain/general';
+import type { LogMethods } from '../../domain/general';
 import { decideIsBadRequestError } from './badRequestErrorMiddleware';
 
 /**

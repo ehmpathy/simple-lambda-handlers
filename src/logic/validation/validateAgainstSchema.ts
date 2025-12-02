@@ -1,8 +1,8 @@
 import { BadRequestError } from 'helpful-errors';
-import { ValidationError } from 'joi';
+import type { ValidationError } from 'joi';
 
 // only importing types -> dev dep
-import { EventSchema } from '../../domain/general';
+import type { EventSchema } from '../../domain/general';
 
 interface EventValidationErrorDetail {
   message: string;

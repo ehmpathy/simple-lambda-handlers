@@ -3,13 +3,16 @@ ignores:
   - declapract
   - declapract-typescript-ehmpathy
   - '@commitlint/config-conventional'
-  - '@trivago/prettier-plugin-sort-imports'
-  - '@tsconfig/node-lts-strictest'
-  - babel-jest
-  - core-js
-  - ts-jest
   - tsx
   - husky
   - if-env
   - test-fns
   - helpful-errors
+  - rhachet
+  - "@tsconfig/node20"
+  - "@tsconfig/strictest"
+  - "@biomejs/biome"
+  - esbuild-register
+  - "@swc/core"
+  - "@swc/jest"
+  - aws-lambda

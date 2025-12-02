@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { APIGatewayProxyEventV2, APIGatewayProxyEvent } from 'aws-lambda';
+import type { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from 'aws-lambda';
 
 // only importing types -> dev dep
 
