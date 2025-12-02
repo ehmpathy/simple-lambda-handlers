@@ -7,10 +7,28 @@ import { HTTPStatusCode } from '../../domain/constants';
  * .what = procedure for deciding whether an error is a bad request error
  */
 export const decideIsBadRequestError = ({ error }: { error: Error }) => {
+  // check if the error is an instance of BadRequestError
   const isInstanceOfBadRequestError = error instanceof BadRequestError;
+  if (isInstanceOfBadRequestError) return true;
+
+  // check if the error's constructor is named 'BadRequestError'
   const isNamedAfterBadRequestError =
     error.constructor.name === 'BadRequestError';
-  return isInstanceOfBadRequestError || isNamedAfterBadRequestError;
+  if (isNamedAfterBadRequestError) return true;
+
+  // check if any parent class in the prototype chain is named 'BadRequestError'
+  const isExtensionOfBadRequestError = (() => {
+    let proto = Object.getPrototypeOf(error.constructor);
+    while (proto) {
+      if (proto.name === 'BadRequestError') return true;
+      proto = Object.getPrototypeOf(proto);
+    }
+    return false;
+  })();
+  if (isExtensionOfBadRequestError) return true;
+
+  // otherwise, not a bad request error
+  return false;
 };
 
 /**
